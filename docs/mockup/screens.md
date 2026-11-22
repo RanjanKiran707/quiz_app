@@ -23,23 +23,24 @@ The mockup is a self-contained page. It has **no HTTP layer and no fake server**
 | 5 | Attempt — running | same route, in-page state | Answer questions with a live timer and End control | running, answered progress, end confirmation, discard confirmation, storage error | `saveAttempt(payload)` |
 | 6 | Result (fresh attempt) | `#/quizzes/:quizId/result/:attemptId` | Show score, accuracy, time and date after End | loading, loaded, error | `attempt(id)` |
 | 7 | Attempt summary | `#/attempts/:attemptId` | Read a past attempt from history | loading, loaded, error | `attempt(id)` |
-| 8 | Import | `#/import?folder=:folderId` | Pick one or more JSON files, validate, preview, import | idle/empty, reading, partial valid, all invalid, importing, success, error | `folderContents(id)`, `importQuizzes(folderId, quizzes)` |
-| 9 | Not found | any unknown route, e.g. `#/does-not-exist` | Friendly dead-end with a way back | loaded | — |
+| 8 | Attempt review | `#/attempts/:attemptId/review` | See every question, your answer, the correct answer, status and explanation | loading, loaded, error | `attempt(id)`, `quiz(quizId)` |
+| 9 | Import | `#/import?folder=:folderId` | Pick one or more JSON files, validate, preview, import | idle/empty, reading, partial valid, all invalid, importing, success, error | `folderContents(id)`, `importQuizzes(folderId, quizzes)` |
+| 10 | Not found | any unknown route, e.g. `#/does-not-exist` | Friendly dead-end with a way back | loaded | — |
 
 ### Sheets, dialogs and transient UI
 
 | # | Overlay | Opened from | States |
 |---|---|---|---|
-| 10 | Add menu | FAB on All folders or Folder | idle; offers New folder, and Import quizzes inside a folder |
-| 11 | New folder | Add menu or empty state | idle, validation error, saving, duplicate name, storage error |
-| 12 | Folder actions | Row more button or folder app bar | idle; Rename folder, Delete folder |
-| 13 | Rename folder | Folder actions | idle, validation error, saving, duplicate name, storage error |
-| 14 | Delete folder | Folder actions | loading preview, counts, deleting, storage error |
-| 15 | Quiz actions | Quiz row more button or quiz app bar | idle; Delete quiz |
-| 16 | Delete quiz | Quiz actions | counts, deleting, storage error |
-| 17 | End attempt | End button (app bar or footer) | answered/unanswered summary, saving, storage error |
-| 18 | Discard attempt | Close button, back gesture, browser back | confirmation |
-| 19 | Toast | Any completed mutation | success or error, auto-dismiss |
+| 11 | Add menu | FAB on All folders or Folder | idle; offers New folder, and Import quizzes inside a folder |
+| 12 | New folder | Add menu or empty state | idle, validation error, saving, duplicate name, storage error |
+| 13 | Folder actions | Row more button or folder app bar | idle; Rename folder, Delete folder |
+| 14 | Rename folder | Folder actions | idle, validation error, saving, duplicate name, storage error |
+| 15 | Delete folder | Folder actions | loading preview, counts, deleting, storage error |
+| 16 | Quiz actions | Quiz row more button or quiz app bar | idle; Delete quiz |
+| 17 | Delete quiz | Quiz actions | counts, deleting, storage error |
+| 18 | End attempt | End button (app bar or footer) | answered/unanswered summary, saving, storage error |
+| 19 | Discard attempt | Close button, back gesture, browser back | confirmation |
+| 20 | Toast | Any completed mutation | success or error, auto-dismiss |
 
 ---
 
@@ -52,6 +53,7 @@ The mockup is a self-contained page. It has **no HTTP layer and no fake server**
 #/quizzes/q-ipv4/attempt            Pre-start → running
 #/quizzes/q-ipv4/result/:attemptId   Result after End
 #/attempts/a-ipv4-10                Attempt summary from history
+#/attempts/a-ipv4-10/review         Attempt review (answers)
 #/import?folder=f-net               Import into a folder
 #/does-not-exist                    Not found
 ```
@@ -77,6 +79,8 @@ Screens never read the mock database directly. They call `repo.*`; each method r
 | `saveAttempt(payload)` | Save a completed attempt and compute its score | `{ attempt, quiz }` |
 | `attempt(id)` | Attempt summary and its quiz | `{ attempt, quiz }` |
 
+The review screen combines `attempt(id)` with `quiz(quizId)` to get the ordered questions and options, then compares the stored `answers_json` to the correct answers.
+
 The simulated query delay is 350 ms by default (0/150/350/700 ms). The storage error rate can be set to 0/10/30/100%. Errors are thrown as `DataError`, never returned as HTTP responses.
 
 ---
@@ -95,6 +99,7 @@ The simulated query delay is 350 ms by default (0/150/350/700 ms). The storage e
 | `deleteQuiz(id)` | `DeleteQuizUsecase` → `QuizRepositoryInterface.deleteQuiz(...)` |
 | `saveAttempt(payload)` | `CompleteAttemptUsecase` → `AttemptRepositoryInterface.saveAttempt(...)` |
 | `attempt(id)` | `AttemptRepositoryInterface.getAttempt(id)` → `GetAttemptUsecase` |
+| `attempt(id)` + `quiz(quizId)` | `GetAttemptReviewUsecase` combining `AttemptRepositoryInterface.getAttempt` and `QuizRepositoryInterface.getQuiz` |
 
 The client-side JSON parsing in the mock stands in for the future pure Dart mapper. After parsing, the payload is already the canonical quiz shape, so the repository boundary stays clean.
 
@@ -111,6 +116,7 @@ There is **no HTTP client, API client or fake server** in the real app. Reposito
 | Quizzes | 13 |
 | Questions | 99 (including the real 35-question IPv4 quiz) |
 | Attempts | 33 (10 on the IPv4 quiz, 1–4 on the others) |
+| Stored answers | Each seeded attempt stores generated answers that match its score: exactly the scored questions are correct; the rest are wrong or unanswered |
 | Empty folder | Archive (`f-empty`) |
 | Long title | "Computer Networks, Lecture 1: Classful IPv4 Addressing" |
 | Math content | Real inline LaTeX from `docs/quiz.json`, rendered with bundled KaTeX |
@@ -150,6 +156,7 @@ The **Sample import** and **Invalid import** buttons in the developer toolbar lo
 | Loading | Set query delay to 700 ms and change screens; skeletons match the final layout |
 | Empty | All folders (after deleting all top-level folders) or Archive (`f-empty`) |
 | Empty attempts | Any quiz with no attempts, e.g. a freshly imported quiz |
+| Answer review | Open **Review answers** on any result, or use the toolbar’s Review option |
 | Storage error | Set storage error rate to 100% and change screens |
 | Validation | New folder with a blank or duplicate name; Import an invalid file |
 | Saving | Create/rename/delete/import with query delay at 700 ms |
@@ -180,8 +187,7 @@ The toolbar is review-only and is never reachable from inside the app UI.
 ## 9. Deliberate omissions
 
 - No quiz editing, moving or re-import into an existing quiz (MVP spec).
-- No per-question review screen. Attempts store `answers_json`; the UI shows the summary only.
-- Seeded attempts store `{}` in `answers_json`; newly completed attempts store real answers.
+- The review screen is read-only; answers cannot be changed after End.
 - An in-progress attempt is not persisted if the page is reloaded or closed.
 - The import is client-side in the mock because it runs in a browser. The real app uses `file_picker` and a pure Dart mapper.
 - The mock has no network, accounts, analytics or sync. Data lives in `localStorage`; the real app uses Drift.
@@ -193,6 +199,7 @@ The toolbar is review-only and is never reachable from inside the app UI.
 1. Double-click `docs/mockup/index.html`.
 2. Browse a folder, open the IPv4 quiz, start an attempt, answer a few questions, press End.
 3. Check the result and the new row in the quiz's attempt history.
-4. Click the FAB inside Computer Networks and import the sample quiz.
-5. Use the developer toolbar to walk the loading, empty, storage-error and dark states.
-6. Try a duplicate folder name and an invalid import file to see validation.
+4. Open **Review answers** on the result and inspect correct, wrong and unanswered questions.
+5. Click the FAB inside Computer Networks and import the sample quiz.
+6. Use the developer toolbar to walk the loading, empty, storage-error and dark states.
+7. Try a duplicate folder name and an invalid import file to see validation.

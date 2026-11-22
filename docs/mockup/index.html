@@ -384,6 +384,36 @@
   .stat-value.small { font-size: 11.5px; font-weight: 550; color: var(--ink-2); }
   .saved-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--good); background: var(--good-soft); border-radius: 99px; padding: 4px 9px; margin-bottom: 14px; }
 
+  /* Attempt review */
+  .review-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 15px 15px 13px; margin-bottom: 10px; box-shadow: var(--shadow-sm);
+  }
+  .review-status {
+    margin-left: auto; font-size: 9.5px; font-weight: 750; letter-spacing: .04em;
+    text-transform: uppercase; padding: 2px 6px; border-radius: 5px;
+  }
+  .review-status.correct { color: var(--good); background: var(--good-soft); }
+  .review-status.incorrect { color: var(--danger); background: var(--danger-soft); }
+  .review-status.unanswered { color: var(--mid); background: var(--mid-soft); }
+  .review-answers { display: flex; flex-direction: column; gap: 8px; margin-top: 11px; }
+  .review-line { display: grid; grid-template-columns: 88px 1fr; gap: 8px; align-items: start; }
+  .review-label {
+    font-size: 9px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted); padding-top: 3px;
+  }
+  .review-value { font-size: 12.5px; line-height: 1.5; color: var(--ink); }
+  .review-value.correct { color: var(--good); }
+  .review-value.wrong { color: var(--danger); }
+  .review-value.unanswered { color: var(--muted); }
+  .review-explanation { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  .review-explanation summary { font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .review-explanation div { font-size: 12px; line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
+  .review-explanation .katex { font-size: 1em; }
+  .review-head { padding: 4px 0 16px; }
+  .review-head h1 { font-size: 28px; line-height: 1.1; margin: 6px 0 7px; }
+  .review-head p { margin: 0; font-size: 12px; color: var(--muted); }
+
   /* Import */
   .import-target { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 8px 10px; margin-bottom: 14px; }
   .import-target .icon { color: var(--accent); }
@@ -577,6 +607,7 @@
         <option value="/quizzes/q-ipv4">Quiz · IPv4 addressing</option>
         <option value="/quizzes/q-ipv4/attempt">Attempt · pre-start</option>
         <option value="/attempts/a-ipv4-10">Result · latest IPv4 attempt</option>
+        <option value="/attempts/a-ipv4-10/review">Review · latest IPv4 attempt</option>
         <option value="/import?folder=f-net">Import into Computer Networks</option>
         <option value="/does-not-exist">Not found</option>
       </select>
@@ -939,7 +970,7 @@
      3. Seed data
      ============================================================ */
   var BASE_TIME = new Date('2026-11-22T09:00:00.000Z');
-  var DB_KEY = 'quiz_app_mock_v1';
+  var DB_KEY = 'quiz_app_mock_v2';
 
   function buildSeed() {
     var folders = [
@@ -982,6 +1013,58 @@
       });
     }
 
+    function generateAnswers(quizId, desiredScore) {
+      var quizQuestions = questions
+        .filter(function (q) { return q.quiz_id === quizId; })
+        .sort(function (a, b) { return a.position - b.position; });
+      var result = {};
+      var correctCount = 0;
+
+      quizQuestions.forEach(function (q, index) {
+        var quizOptions = options
+          .filter(function (o) { return o.question_id === q.id; })
+          .sort(function (a, b) { return a.position - b.position; });
+        var shouldBeCorrect = correctCount < desiredScore;
+
+        if (q.type === 'numerical') {
+          if (shouldBeCorrect) {
+            result[q.id] = q.numerical_answer;
+            correctCount++;
+          } else {
+            result[q.id] = index % 3 === 0 ? null : q.numerical_answer + 1;
+          }
+          return;
+        }
+
+        if (q.type === 'mcq') {
+          var correct = quizOptions.find(function (o) { return o.is_correct === 1; });
+          if (shouldBeCorrect) {
+            result[q.id] = correct ? correct.id : null;
+            correctCount++;
+          } else {
+            var wrong = quizOptions.find(function (o) { return o.is_correct !== 1; });
+            result[q.id] = index % 4 === 0 ? null : (wrong ? wrong.id : null);
+          }
+          return;
+        }
+
+        var correctIds = quizOptions
+          .filter(function (o) { return o.is_correct === 1; })
+          .map(function (o) { return o.id; });
+        if (shouldBeCorrect) {
+          result[q.id] = correctIds.slice();
+          correctCount++;
+        } else {
+          var selected = correctIds.slice(0, Math.max(0, correctIds.length - 1));
+          var extra = quizOptions.find(function (o) { return o.is_correct !== 1; });
+          if (extra) selected.push(extra.id);
+          result[q.id] = index % 5 === 0 ? null : selected;
+        }
+      });
+
+      return result;
+    }
+
     function addAttempts(quizId, entries, maxScore) {
       entries.forEach(function (entry, index) {
         var score = entry[0];
@@ -999,7 +1082,7 @@
           duration_ms: duration,
           score: score,
           max_score: maxScore,
-          answers_json: '{}'
+          answers_json: JSON.stringify(generateAnswers(quizId, score))
         });
       });
     }
@@ -1169,7 +1252,7 @@
     ], ipv4Max);
 
     return {
-      version: 1,
+      version: 2,
       folders: folders,
       quizzes: quizzes,
       questions: questions,
@@ -1185,7 +1268,7 @@
   function loadDb() {
     try {
       var stored = JSON.parse(localStorage.getItem(DB_KEY) || 'null');
-      if (stored && stored.version === 1 && Array.isArray(stored.folders) && Array.isArray(stored.quizzes)) {
+      if (stored && stored.version === 2 && Array.isArray(stored.folders) && Array.isArray(stored.quizzes)) {
         return stored;
       }
     } catch (e) {}
@@ -1624,6 +1707,7 @@
       { re: /^\/quizzes\/([^/]+)\/attempt$/, render: function (m, q, t) { return renderAttempt({ id: decodeURIComponent(m[1]) }, q, t); }, attempt: true },
       { re: /^\/quizzes\/([^/]+)\/result\/([^/]+)$/, render: function (m, q, t) { return renderResult({ quizId: decodeURIComponent(m[1]), id: decodeURIComponent(m[2]) }, q, t); } },
       { re: /^\/attempts\/([^/]+)$/, render: function (m, q, t) { return renderResult({ id: decodeURIComponent(m[1]) }, q, t); } },
+      { re: /^\/attempts\/([^/]+)\/review$/, render: function (m, q, t) { return renderAttemptReview({ id: decodeURIComponent(m[1]) }, q, t); } },
       { re: /^\/import$/, render: function (m, q, t) { return renderImport({}, q, t); } }
     ];
     for (var i = 0; i < defs.length; i++) {
@@ -2010,6 +2094,7 @@
         '<div class="stat"><span class="stat-label">Time taken</span><span class="stat-value">' + formatDurationLong(a.duration_ms) + '</span></div>' +
         '<div class="stat"><span class="stat-label">Date</span><span class="stat-value small">' + formatDate(a.started_at) + '</span></div>' +
       '</div>' +
+      (quiz ? '<button class="btn secondary wide" data-action="nav" data-hash="/attempts/' + encodeURIComponent(a.id) + '/review" type="button">' + icon('book', 17) + ' Review answers</button>' : '') +
       (quiz ? '<button class="btn primary wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '/attempt" type="button">' + icon('refresh', 17) + ' Try again</button>' +
       '<button class="btn ghost wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '" type="button">Back to quiz</button>' : emptyState('alert', 'Quiz unavailable', 'This attempt points to a quiz that no longer exists.', 'Go to library', '/'));
 
@@ -2022,6 +2107,134 @@
     } catch (e) {
       if (token !== renderToken) return;
       setScreen(shell({ title: 'Result', back: '/', content: errorState(e.message, 'retry') }));
+    }
+  }
+
+  async function renderAttemptReview(params, query, token) {
+    skeletonScreen('Review', '/attempts/' + params.id, 4);
+    try {
+      var attemptData = await repo.attempt(params.id);
+      if (token !== renderToken) return;
+      var a = attemptData.attempt;
+      var quiz = attemptData.quiz;
+      if (!quiz) throw new Error('This quiz no longer exists.');
+
+      var quizData = await repo.quiz(quiz.id);
+      if (token !== renderToken) return;
+      var questions = (quizData && quizData.questions) || [];
+
+      var answers = {};
+      try {
+        var parsedAnswers = JSON.parse(a.answers_json || '{}');
+        if (parsedAnswers && typeof parsedAnswers === 'object' && !Array.isArray(parsedAnswers)) {
+          answers = parsedAnswers;
+        }
+      } catch (e) {
+        answers = {};
+      }
+
+      var correctCount = 0;
+      var incorrectCount = 0;
+      var unansweredCount = 0;
+
+      var cards = questions.map(function (q, index) {
+        var given = answers[q.id];
+        var isCorrect = false;
+        var isUnanswered = false;
+        var givenText = 'No answer';
+        var correctText = '—';
+        var unit = q.unit ? ' ' + q.unit : '';
+
+        if (q.type === 'numerical') {
+          var raw = given;
+          var number = (raw === null || raw === undefined || String(raw).trim() === '')
+            ? null
+            : Number(raw);
+          isUnanswered = number === null || !isFinite(number);
+          var tolerance = q.tolerance == null ? 0 : q.tolerance;
+          isCorrect = !isUnanswered &&
+            q.numerical_answer != null &&
+            Math.abs(number - q.numerical_answer) <= tolerance + 1e-9;
+          givenText = isUnanswered ? 'No answer' : (number + unit);
+          correctText = q.numerical_answer == null
+            ? '—'
+            : (q.numerical_answer + unit) + (tolerance ? ' (±' + tolerance + ')' : '');
+        } else {
+          var optionList = q.options || [];
+          var selectedIds = q.type === 'mcq'
+            ? (typeof given === 'string' ? [given] : [])
+            : (Array.isArray(given) ? given : []);
+          var selectedOptions = optionList.filter(function (o) {
+            return selectedIds.indexOf(o.id) !== -1;
+          });
+          var correctOptions = optionList.filter(function (o) { return o.is_correct === 1; });
+
+          isUnanswered = selectedIds.length === 0;
+          var selectedSet = selectedIds.slice().sort();
+          var correctSet = correctOptions.map(function (o) { return o.id; }).sort();
+          isCorrect = !isUnanswered &&
+            selectedSet.length === correctSet.length &&
+            selectedSet.every(function (id, i) { return id === correctSet[i]; });
+
+          givenText = selectedOptions.length
+            ? selectedOptions.map(function (o) { return o.text; }).join(' · ')
+            : 'No answer';
+          correctText = correctOptions.length
+            ? correctOptions.map(function (o) { return o.text; }).join(' · ')
+            : '—';
+        }
+
+        if (isUnanswered) unansweredCount++;
+        else if (isCorrect) correctCount++;
+        else incorrectCount++;
+
+        var status = isUnanswered ? 'unanswered' : (isCorrect ? 'correct' : 'incorrect');
+        var statusLabel = isUnanswered ? 'Unanswered' : (isCorrect ? 'Correct' : 'Incorrect');
+        var yourClass = isUnanswered ? 'unanswered' : (isCorrect ? '' : 'wrong');
+
+        return '<article class="review-card">' +
+          '<div class="question-head">' +
+            '<span class="question-num">' + pad(index + 1) + '</span>' +
+            '<span class="type-chip ' + q.type + '">' + typeLabel(q.type) + '</span>' +
+            '<span class="marks">' + (q.marks || 1) + ' mark</span>' +
+            '<span class="review-status ' + status + '">' + statusLabel + '</span>' +
+          '</div>' +
+          '<h2 class="question-prompt">' + rich(q.prompt) + '</h2>' +
+          '<div class="review-answers">' +
+            '<div class="review-line"><span class="review-label">Your answer</span><span class="review-value ' + yourClass + '">' + rich(givenText) + '</span></div>' +
+            '<div class="review-line"><span class="review-label">Correct answer</span><span class="review-value correct">' + rich(correctText) + '</span></div>' +
+          '</div>' +
+          (q.explanation
+            ? '<details class="review-explanation"><summary>Explanation</summary><div>' + rich(q.explanation) + '</div></details>'
+            : '') +
+        '</article>';
+      }).join('');
+
+      var content = '<section class="review-head">' +
+        '<div class="eyebrow">Answer review</div>' +
+        '<h1 class="display">' + esc(quiz.title) + '</h1>' +
+        '<p>' + formatDate(a.started_at) + ' · ' + formatDurationLong(a.duration_ms) + '</p>' +
+      '</section>' +
+      '<div class="stat-grid">' +
+        '<div class="stat"><span class="stat-label">Score</span><span class="stat-value">' + a.score + ' / ' + a.max_score + '</span></div>' +
+        '<div class="stat"><span class="stat-label">Correct</span><span class="stat-value">' + correctCount + '</span></div>' +
+        '<div class="stat"><span class="stat-label">Wrong</span><span class="stat-value">' + incorrectCount + '</span></div>' +
+        '<div class="stat"><span class="stat-label">Unanswered</span><span class="stat-value">' + unansweredCount + '</span></div>' +
+      '</div>' +
+      (cards || emptyState('file', 'No questions to review', 'The quiz definition for this attempt is empty.', 'Back to result', '/attempts/' + encodeURIComponent(a.id)));
+
+      setScreen(shell({
+        title: 'Review',
+        back: '/attempts/' + encodeURIComponent(a.id),
+        content: content
+      }));
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({
+        title: 'Review',
+        back: '/attempts/' + encodeURIComponent(params.id),
+        content: errorState(e.message, 'retry')
+      }));
     }
   }
 

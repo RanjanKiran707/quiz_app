@@ -1,6 +1,6 @@
 # Quiz App — Product Specification
 
-**Status:** Draft v3 — awaiting approval
+**Status:** Draft v4 — awaiting approval
 **Date:** 2026-11-22
 **Source:** User PRD plus decisions agreed on 2026-11-22
 **App / package name:** `quiz_app`
@@ -11,9 +11,9 @@
 
 ## 1. Overview
 
-Quiz App is a lightweight, local-first application for organising quizzes inside nested folders, importing quiz content from JSON, attempting quizzes, and reviewing a per-quiz history of attempts.
+Quiz App is a lightweight, local-first application for organising quizzes inside nested folders, importing quiz content from JSON, attempting quizzes, and reviewing a per-quiz history of attempts with question-by-question answers.
 
-The product is deliberately small: folder navigation, JSON import, quiz taking, attempt history. No accounts, no network, no social features. The interface stays minimal and distraction-free.
+The product is deliberately small: folder navigation, JSON import, quiz taking, attempt history and answer review. No accounts, no network, no social features. The interface stays minimal and distraction-free.
 
 ### Core value
 
@@ -21,6 +21,7 @@ The product is deliberately small: folder navigation, JSON import, quiz taking, 
 2. Bring content in quickly through one or more JSON files.
 3. Practise the three question formats that matter: MCQ, MSQ, Numerical.
 4. See exactly how each attempt went: score, time taken, date.
+5. Review every answer from an attempt: your answer, the correct answer and the explanation.
 
 ---
 
@@ -35,6 +36,7 @@ The product is deliberately small: folder navigation, JSON import, quiz taking, 
 - Support only MCQ, MSQ and Numerical questions.
 - Explicit **Start** and **End** controls with elapsed-time tracking.
 - Persist every completed attempt and show score, time taken and date.
+- Review every attempt question by question: your answer, the correct answer, status and explanation.
 - Clean, minimal, responsive UI in light and dark mode.
 - All data stored locally and available offline.
 
@@ -44,7 +46,6 @@ The product is deliberately small: folder navigation, JSON import, quiz taking, 
 - In-app quiz authoring/editing, re-import into an existing quiz, moving quizzes or folders.
 - Accounts, authentication, cloud sync, sharing, collaboration.
 - Leaderboards, streaks, notifications, gamification.
-- Per-question review after an attempt (answers are stored so this can be added later).
 - Per-question timers, negative marking, question shuffling, question pools.
 - Analytics beyond the per-quiz attempt history.
 
@@ -60,6 +61,7 @@ Single local user, typically a student or self-learner.
 | Add a quiz | One or more quiz JSON files exist | Imported into the chosen folder in one flow |
 | Practise | Ready to test knowledge | Start, answer, end, see score |
 | Check progress | Wants proof of practice | Attempt history shows score, time and date |
+| Learn from mistakes | Wants to see what went wrong | Review every question, both answers and the explanation |
 
 No onboarding, login or profile is required.
 
@@ -72,7 +74,7 @@ No onboarding, login or profile is required.
 | Folders | Nested tree, create / rename / delete | Move, reorder, drag and drop |
 | Quizzes | JSON import (single or batch), delete, unlimited attempts | Edit, duplicate, share, playlist/YouTube import |
 | Question types | MCQ, MSQ, Numerical | True/False, fill-in-the-blank, matching |
-| Attempts | Start/End timing, score, history | Per-question review, resume, pause |
+| Attempts | Start/End timing, score, history, per-question answer review | Resume, pause |
 | Data | Local SQLite (Drift), fully offline | Cloud backup / sync |
 | Design | Minimal Material 3, light + dark, mobile-first | App icon, theming options |
 
@@ -158,7 +160,7 @@ Only three types are supported. Each question carries a prompt, a positive mark 
 | FR-4.7 | Back navigation while running asks **Discard this attempt?**; confirming discards it and nothing is added to history. The system back gesture and the AppBar back arrow behave the same. |
 | FR-4.8 | Back navigation before Start (or after the result) is not blocked. |
 | FR-4.9 | An attempt is saved only on **End**. Force-quitting the app during an attempt loses that attempt (MVP limitation, documented). |
-| FR-4.10 | The result screen shows score, percentage, marks earned out of total, and time taken. It offers **Try again** and **Back to quiz**. |
+| FR-4.10 | The result screen shows score, percentage, marks earned out of total, and time taken. It offers **Review answers**, **Try again** and **Back to quiz**. |
 
 ### FR-5 Scoring
 
@@ -167,7 +169,7 @@ Only three types are supported. Each question carries a prompt, a positive mark 
 - Percentage is rounded for display only; stored values are exact.
 - MSQ is all-or-nothing; partial selections earn zero.
 - Numerical comparison uses the question's tolerance; with tolerance 0, values are compared numerically (no string comparison) with a small floating-point epsilon where needed.
-- Answers are persisted with the attempt (so review can be added later) but are not shown in the MVP result screen beyond the summary.
+- Answers are persisted with the attempt and shown in the attempt review (question by question).
 
 ### FR-6 Attempt history
 
@@ -178,6 +180,9 @@ Only three types are supported. Each question carries a prompt, a positive mark 
 | FR-6.3 | Tapping a row opens that attempt's result summary. |
 | FR-6.4 | Empty, loading and error states are handled explicitly. |
 | FR-6.5 | History is stored locally and survives app restarts. |
+| FR-6.6 | **Review answers** opens a read-only screen listing every question in quiz order. Each item shows the prompt, the user's answer, the correct answer, a Correct / Incorrect / Unanswered status and the explanation when present. |
+| FR-6.7 | The review uses the answers stored with that attempt; it never changes the score, answers or history. |
+| FR-6.8 | Numerical review shows the entered value, the expected value, the unit and the tolerance where applicable. MSQ review shows the full selected set and the full correct set. |
 
 ### FR-7 Deletion and integrity
 
@@ -227,7 +232,7 @@ Notes:
 - IDs are stable strings (UUIDs).
 - Import snapshots the quiz definition into these tables; the original JSON is not re-read later.
 - Timestamps are stored in UTC and displayed in local time.
-- `answersJson` holds the user's selections/number per question for future review.
+- `answersJson` holds the user's selections/number per question and is displayed in the attempt review.
 - The import format has no marks field, so every question is worth 1 mark and the quiz total equals the question count.
 - `sourceKey` is stored for traceability but is not used for duplicate detection: re-importing the same `key` always creates a new quiz.
 - `difficulty`, `explanation` and `unit` are stored even though the MVP UI does not show explanations; this avoids losing source data on import.
@@ -250,6 +255,7 @@ Notes:
 | 9 | Attempt result | Score, percentage, time, navigation | loaded |
 | 10 | Delete quiz dialog | Confirm quiz and history deletion | idle, deleting |
 | 11 | Attempt summary (from history) | Read-only result of a past attempt | loaded |
+| 12 | Attempt review | Every question with your answer, correct answer, status and explanation | loading, loaded, error |
 
 Shared UX rules:
 
@@ -403,15 +409,16 @@ Before saving, show one row per selected file: title, subtitle, question counts 
 11. A numerical answer exactly equal to the stored answer is correct; any other value is incorrect (the current format has no tolerance).
 12. Backing out of a running attempt after confirmation leaves no history row.
 13. Attempt history is newest-first and shows score, time taken and date; it persists across restarts.
-14. Deleting a quiz removes its questions, options and attempts, and other quizzes are untouched.
-15. All screens render usable loading, empty and error states.
-16. The app works fully offline.
-17. `flutter analyze` is clean and the full test suite passes at the end of each delivery phase.
-18. `docs/quiz.json` imports as a 35-question quiz worth 35 marks: 15 MCQ, 10 MSQ and 10 NAT.
-19. A file containing unescaped `\(...\)` LaTeX, including `\times` and `\text`, imports with the math intact after repair and shows the regeneration notice.
-20. Inline math in prompts and options renders without raw backslashes or error boxes.
-21. Selecting multiple JSON files imports one quiz per valid file in a single flow and shows a per-file result summary.
-22. A batch containing an unreadable or invalid file skips that file with a reason and still imports the remaining valid files.
+14. **Review answers** on any attempt shows every question with the user's answer, the correct answer, a correct/incorrect/unanswered status, and the explanation when present.
+15. Deleting a quiz removes its questions, options and attempts, and other quizzes are untouched.
+16. All screens render usable loading, empty and error states.
+17. The app works fully offline.
+18. `flutter analyze` is clean and the full test suite passes at the end of each delivery phase.
+19. `docs/quiz.json` imports as a 35-question quiz worth 35 marks: 15 MCQ, 10 MSQ and 10 NAT.
+20. A file containing unescaped `\(...\)` LaTeX, including `\times` and `\text`, imports with the math intact after repair and shows the regeneration notice.
+21. Inline math in prompts and options renders without raw backslashes or error boxes.
+22. Selecting multiple JSON files imports one quiz per valid file in a single flow and shows a per-file result summary.
+23. A batch containing an unreadable or invalid file skips that file with a reason and still imports the remaining valid files.
 
 ---
 
@@ -433,6 +440,7 @@ Before saving, show one row per selected file: title, subtitle, question counts 
 | 2026-11-22 | No HTTP/API layer; every read and write goes through Drift repositories directly (the mockup calls a local repository facade) | User |
 | 2026-11-22 | Quizzes only inside folders; root holds folders only | Derived from PRD |
 | 2026-11-22 | Answers stored per attempt for future review | Spec assumption |
+| 2026-11-22 | Per-attempt answer review is part of the MVP: every question, both answers, status and explanation | User |
 
 ---
 
@@ -441,9 +449,8 @@ Before saving, show one row per selected file: title, subtitle, question counts 
 | # | Question | Impact |
 |---|---|---|
 | 1 | Should quizzes ever be allowed at the root? Current spec says no | Navigation and import entry points |
-| 2 | Should attempt history support per-question review in this MVP? Current spec says no | Extra screen and scoring presentation |
-| 3 | Initial app icon and accent colour, or use defaults for now? | Assets and theme |
-| 4 | Should the importer keep the backslash repair permanently, or only until the quiz generator emits valid JSON? | Import maintenance and test fixtures |
+| 2 | Initial app icon and accent colour, or use defaults for now? | Assets and theme |
+| 3 | Should the importer keep the backslash repair permanently, or only until the quiz generator emits valid JSON? | Import maintenance and test fixtures |
 
 ---
 
@@ -462,10 +469,10 @@ The Flutter workflow documents in `Flutter/` govern delivery.
 Models, Drift schema, repositories, in-memory tests, `docs/progress/data_layer_progress.md`.
 
 ### Phase 2 — Use cases
-Business use cases (folder CRUD, import validation, quiz delete, complete attempt/scoring) and UI use cases (folder contents, quiz detail, attempt history), tests and progress file.
+Business use cases (folder CRUD, import validation, quiz delete, complete attempt/scoring) and UI use cases (folder contents, quiz detail, attempt history, attempt review), tests and progress file.
 
 ### Phase 3 — Features
-Agreed order: folder browser → folder actions → JSON import → quiz detail/history → attempt runner → result. ViewModel and widget tests per feature, integration test for the main journey, progress file.
+Agreed order: folder browser → folder actions → JSON import → quiz detail/history → attempt runner → result → attempt review. ViewModel and widget tests per feature, integration test for the main journey, progress file.
 
 ---
 
