@@ -1,0 +1,2950 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz App — Interactive Mockup</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<style>
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('assets/fonts/inter-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/instrument-serif-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/instrument-serif-italic-latin.woff2') format('woff2');
+  }
+
+  :root, [data-theme="light"] {
+    --page-bg: #ecece5;
+    --page-dot: #d9d9d0;
+    --bg: #f8f8f4;
+    --surface: #ffffff;
+    --surface-2: #f0f0e9;
+    --surface-3: #e8e8df;
+    --ink: #1b1c18;
+    --ink-2: #35362f;
+    --muted: #74756c;
+    --muted-2: #94958b;
+    --line: #e5e5dd;
+    --line-strong: #d6d6cc;
+    --accent: #3a5a40;
+    --accent-strong: #2e4934;
+    --accent-ink: #ffffff;
+    --accent-soft: #edf3ee;
+    --good: #2f6b3c;
+    --good-soft: #e9f3ea;
+    --mid: #8a6113;
+    --mid-soft: #fbf3df;
+    --low: #9a3f37;
+    --low-soft: #faeaE7;
+    --danger: #a3413a;
+    --danger-soft: #fbecea;
+    --frame: #12130f;
+    --shadow: 0 30px 70px rgba(26, 28, 22, .22), 0 2px 8px rgba(26, 28, 22, .08);
+    --shadow-sm: 0 1px 2px rgba(26, 28, 22, .05), 0 6px 18px rgba(26, 28, 22, .04);
+  }
+  [data-theme="dark"] {
+    --page-bg: #0b0c09;
+    --page-dot: #20221c;
+    --bg: #121410;
+    --surface: #1a1c17;
+    --surface-2: #23261f;
+    --surface-3: #2c3027;
+    --ink: #edeee8;
+    --ink-2: #d7d9d1;
+    --muted: #a4a79b;
+    --muted-2: #7e8176;
+    --line: #2d3128;
+    --line-strong: #3b4034;
+    --accent: #a9c7af;
+    --accent-strong: #c0d8c4;
+    --accent-ink: #142016;
+    --accent-soft: #223025;
+    --good: #9fceaa;
+    --good-soft: #1d2b20;
+    --mid: #e0bc72;
+    --mid-soft: #2b2517;
+    --low: #e09a90;
+    --low-soft: #2f1d1a;
+    --danger: #e2988f;
+    --danger-soft: #301e1b;
+    --frame: #050604;
+    --shadow: 0 32px 80px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .35);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 22px rgba(0, 0, 0, .18);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background-color: var(--page-bg);
+    background-image: radial-gradient(var(--page-dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: .5; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -.015em; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .icon { display: block; flex: none; }
+  .muted { color: var(--muted); }
+  .center { text-align: center; }
+  .wide { width: 100%; }
+  .small { font-size: 12px; }
+  .eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
+
+  /* Stage + phone */
+  .stage { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; gap: 30px; padding: 28px; }
+  .device-wrap { position: sticky; top: 28px; flex: none; }
+  .device {
+    width: 394px; height: 848px; padding: 2px; border-radius: 48px;
+    background: var(--frame); box-shadow: var(--shadow); position: relative;
+  }
+  .device-screen {
+    width: 390px; height: 844px; border-radius: 46px; overflow: hidden;
+    background: var(--bg); display: flex; flex-direction: column; position: relative;
+  }
+  .statusbar {
+    height: 40px; flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px 0 30px; font-size: 12.5px; font-weight: 650; color: var(--ink);
+    letter-spacing: .01em; position: relative; z-index: 2;
+  }
+  .statusbar .status-icons { display: flex; align-items: center; gap: 6px; }
+  .statusbar .bars { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
+  .statusbar .bars i { display: block; width: 2.5px; background: var(--ink); border-radius: 1px; }
+  .statusbar .bars i:nth-child(1) { height: 4px; opacity: .5; }
+  .statusbar .bars i:nth-child(2) { height: 6px; opacity: .65; }
+  .statusbar .bars i:nth-child(3) { height: 8px; opacity: .8; }
+  .statusbar .bars i:nth-child(4) { height: 10px; }
+  .statusbar .battery { width: 21px; height: 10px; border: 1.3px solid var(--ink); border-radius: 3px; position: relative; opacity: .9; }
+  .statusbar .battery::after { content: ''; position: absolute; right: -3.5px; top: 2.5px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+  .statusbar .battery i { position: absolute; inset: 2px; right: 4px; background: var(--ink); border-radius: 1px; }
+  .home-indicator { height: 26px; flex: none; display: grid; place-items: center; }
+  .home-indicator i { width: 122px; height: 4px; border-radius: 99px; background: var(--ink); opacity: .22; }
+
+  .app { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+  #screen { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+  .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+
+  .appbar {
+    height: 56px; flex: none; display: grid; grid-template-columns: 48px 1fr 48px;
+    align-items: center; padding: 0 6px; gap: 2px;
+  }
+  .appbar-slot { width: 40px; height: 40px; }
+  .appbar-title {
+    font-size: 15.5px; font-weight: 650; text-align: center; letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;
+  }
+  .appbar-actions { display: flex; justify-content: flex-end; align-items: center; gap: 2px; }
+  .icon-btn {
+    width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 12px;
+    background: transparent; color: var(--ink-2); transition: background .15s ease, transform .15s ease;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn:active { transform: scale(.94); }
+
+  .content { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 2px 20px 96px; scrollbar-width: none; overscroll-behavior: contain; }
+  .content::-webkit-scrollbar { display: none; }
+  .content.flush { padding-left: 0; padding-right: 0; }
+
+  .offline-banner {
+    flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 18px;
+    background: var(--mid-soft); color: var(--mid); font-size: 12px; border-bottom: 1px solid var(--line);
+  }
+  .offline-banner span { flex: 1; }
+  .offline-banner .text-btn { color: var(--mid); font-weight: 650; }
+
+  /* Typography blocks */
+  .hero { padding: 6px 0 20px; }
+  .hero h1 { font-size: 36px; line-height: 1.05; margin: 7px 0 8px; }
+  .hero-sub { color: var(--muted); font-size: 13.5px; margin: 0 0 10px; max-width: 300px; }
+  .hero-meta { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .hero-meta .dot-sep { width: 3px; height: 3px; background: var(--muted-2); border-radius: 50%; }
+  .screen-intro { padding: 4px 0 18px; }
+  .screen-intro h1 { font-size: 34px; line-height: 1.06; margin: 5px 0 6px; }
+  .screen-intro p { color: var(--muted); margin: 0; font-size: 13px; }
+
+  .crumbs { display: flex; align-items: center; gap: 2px; overflow-x: auto; padding: 0 0 14px; scrollbar-width: none; }
+  .crumbs::-webkit-scrollbar { display: none; }
+  .crumb { border: 0; background: transparent; color: var(--muted); padding: 5px 4px; font-size: 12px; border-radius: 6px; white-space: nowrap; }
+  .crumb:hover { color: var(--ink); background: var(--surface-2); }
+  .crumb.current { color: var(--ink); font-weight: 600; }
+  .crumb-sep { color: var(--muted-2); flex: none; opacity: .7; }
+
+  .folder-summary { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; padding: 0 0 12px; }
+  .folder-summary .dot-sep { width: 3px; height: 3px; background: var(--muted-2); border-radius: 50%; }
+
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 2px 6px; }
+  .section-head > span:first-child { font-size: 10.5px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .section-count { font-size: 11px; color: var(--muted); background: var(--surface-2); border-radius: 99px; padding: 1px 7px; }
+
+  /* Rows */
+  .rows { border-top: 1px solid var(--line); }
+  .row { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+  .row-hit {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 13px 2px;
+    border: 0; background: transparent; text-align: left; border-radius: 0;
+  }
+  .row-hit:hover .row-title { color: var(--accent); }
+  .row-icon {
+    width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none;
+    background: var(--surface-2); color: var(--ink-2);
+  }
+  .row-icon.quiz { background: var(--accent-soft); color: var(--accent); }
+  .row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .row-title { font-size: 14px; font-weight: 600; letter-spacing: -.005em; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; overflow: hidden; transition: color .15s ease; }
+  .row-meta { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-end { display: flex; align-items: center; gap: 7px; color: var(--muted-2); flex: none; padding-left: 6px; }
+  .row-more {
+    width: 34px; flex: none; border: 0; background: transparent; color: var(--muted-2); border-radius: 9px;
+    display: grid; place-items: center; margin-left: 2px;
+  }
+  .row-more:hover { background: var(--surface-2); color: var(--ink); }
+  .row:hover { background: color-mix(in srgb, var(--surface) 55%, transparent); }
+
+  .score-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; font-weight: 700; padding: 3px 6px; border-radius: 7px; letter-spacing: -.02em;
+  }
+  .score-badge.good { color: var(--good); background: var(--good-soft); }
+  .score-badge.mid { color: var(--mid); background: var(--mid-soft); }
+  .score-badge.low { color: var(--low); background: var(--low-soft); }
+
+  /* Buttons */
+  .btn {
+    min-height: 46px; border: 1px solid transparent; border-radius: 12px; padding: 0 16px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13.5px; font-weight: 650; letter-spacing: -.005em;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease, color .15s ease;
+  }
+  .btn:active { transform: scale(.985); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: var(--accent-strong); }
+  .btn.secondary { background: var(--surface); border-color: var(--line-strong); color: var(--ink); }
+  .btn.secondary:hover { background: var(--surface-2); }
+  .btn.ghost { background: transparent; color: var(--muted); }
+  .btn.ghost:hover { background: var(--surface-2); color: var(--ink); }
+  .btn.danger { background: var(--danger); color: #fff; }
+  [data-theme="dark"] .btn.danger { color: #1d0e0c; }
+  .btn.outline { background: transparent; border-color: var(--line-strong); color: var(--ink); }
+  .btn.outline:hover { background: var(--surface-2); }
+  .btn.small { min-height: 34px; padding: 0 12px; font-size: 12.5px; border-radius: 10px; }
+  .btn .spinner { width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+  .text-btn { border: 0; background: transparent; color: var(--accent); font-weight: 650; font-size: 12.5px; padding: 2px; border-radius: 4px; }
+  .text-btn:hover { text-decoration: underline; }
+  .wide + .wide { margin-top: 8px; }
+  .center-hint { text-align: center; color: var(--muted); font-size: 11.5px; margin: 10px 0 0; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip { font-size: 10.8px; font-weight: 550; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
+  .chip.soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow-sm); }
+  .card + .card { margin-top: 12px; }
+  .card h3 { font-size: 14px; margin: 0 0 8px; }
+  .card p { margin: 0; color: var(--muted); font-size: 12.5px; }
+
+  /* Detail */
+  .detail-hero { padding: 6px 0 18px; }
+  .detail-hero h1 { font-size: 32px; line-height: 1.08; margin: 7px 0 8px; }
+  .detail-sub { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 0; max-width: 320px; }
+  .detail-hero .chips { margin-bottom: 18px; }
+
+  /* Attempt rows */
+  .attempt-row { width: 100%; display: flex; align-items: center; gap: 11px; padding: 12px 2px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; }
+  .attempt-row:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .attempt-row:last-child { border-bottom: 0; }
+  .attempt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .attempt-score { font-size: 13px; font-weight: 650; }
+  .attempt-meta { font-size: 11.5px; color: var(--muted); }
+  .attempt-row .chev { color: var(--muted-2); }
+
+  /* Empty / error / skeleton */
+  .empty { padding: 42px 18px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .empty .empty-icon { width: 58px; height: 58px; border-radius: 18px; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); margin-bottom: 15px; }
+  .empty h2 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 25px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .empty p { color: var(--muted); font-size: 12.5px; margin: 0 0 18px; max-width: 260px; line-height: 1.55; }
+  .empty .btn { min-width: 170px; }
+  .error-box { padding: 40px 18px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .error-box .error-icon { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--danger-soft); color: var(--danger); margin-bottom: 14px; }
+  .error-box h2 { font-size: 17px; margin: 0 0 6px; }
+  .error-box p { color: var(--muted); font-size: 12.5px; margin: 0 0 16px; max-width: 270px; }
+  .skeleton-row { display: flex; align-items: center; gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
+  .skeleton-row .s-icon { width: 42px; height: 42px; border-radius: 12px; flex: none; }
+  .skeleton-row .s-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .skeleton-row .s-line { height: 9px; border-radius: 5px; }
+  .skeleton-row .s-line.short { width: 45%; }
+  .skeleton-row .s-line.mid { width: 70%; }
+  .skeleton { background: linear-gradient(90deg, var(--surface-2) 20%, var(--surface-3) 40%, var(--surface-2) 60%); background-size: 220% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+  @keyframes shimmer { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+
+  /* FAB */
+  .fab {
+    position: absolute; right: 20px; bottom: 22px; z-index: 5;
+    width: 54px; height: 54px; border-radius: 18px; border: 0;
+    background: var(--accent); color: var(--accent-ink); display: grid; place-items: center;
+    box-shadow: 0 10px 24px rgba(31, 52, 35, .28); transition: transform .15s ease, background .15s ease;
+  }
+  .fab:hover { background: var(--accent-strong); }
+  .fab:active { transform: scale(.94); }
+  .sheet-open .fab { display: none; }
+
+  /* Footer */
+  .footer { flex: none; padding: 11px 20px 14px; background: var(--bg); border-top: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  .footer-progress { flex: 1; font-size: 11.5px; color: var(--muted); }
+  .footer .btn { min-height: 44px; }
+  .attempt-footer { padding-bottom: 16px; }
+
+  /* Timer */
+  .timer-chip {
+    display: inline-flex; align-items: center; gap: 5px; justify-self: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; font-weight: 650; color: var(--ink); background: var(--surface-2);
+    padding: 5px 9px; border-radius: 99px;
+  }
+  .timer-chip .icon { color: var(--muted); }
+
+  /* Questions */
+  .progress-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; color: var(--muted); padding: 4px 2px 7px; }
+  .progress-meta span:first-child { color: var(--ink-2); font-weight: 600; }
+  .progress { height: 5px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
+  .question-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 17px 16px 15px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+  .question-head { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .question-num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface-2); padding: 2px 6px; border-radius: 6px; }
+  .type-chip { font-size: 9.5px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+  .type-chip.msq { background: #eef0f8; color: #4b5a86; }
+  [data-theme="dark"] .type-chip.msq { background: #23293b; color: #a9b7dd; }
+  .type-chip.numerical { background: var(--mid-soft); color: var(--mid); }
+  .marks { margin-left: auto; font-size: 10.5px; color: var(--muted-2); }
+  .question-prompt { font-size: 14.5px; font-weight: 600; line-height: 1.5; margin: 0 0 13px; letter-spacing: -.005em; }
+  .question-prompt .katex { font-size: 1.02em; }
+  .options { display: flex; flex-direction: column; gap: 7px; }
+  .option {
+    width: 100%; display: flex; align-items: flex-start; gap: 10px; padding: 10px 11px;
+    border: 1px solid var(--line); border-radius: 11px; background: var(--surface); text-align: left;
+    font-size: 13px; line-height: 1.45; color: var(--ink-2); transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover { border-color: var(--line-strong); background: var(--surface-2); }
+  .option.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .option .control {
+    width: 18px; height: 18px; flex: none; border: 1.5px solid var(--line-strong); border-radius: 50%;
+    display: grid; place-items: center; margin-top: .5px; background: var(--surface); transition: all .15s ease;
+  }
+  .option.msq .control { border-radius: 5px; }
+  .option.selected .control { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+  .option .control .dot { width: 7px; height: 7px; border-radius: 50%; background: transparent; }
+  .option.selected .control .dot { background: var(--accent-ink); }
+  .option .control .icon { opacity: 0; }
+  .option.selected .control .icon { opacity: 1; }
+  .numeric-wrap { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); overflow: hidden; }
+  .numeric-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .numeric-input { flex: 1; min-width: 0; height: 46px; border: 0; background: transparent; padding: 0 12px; font-size: 14px; outline: none; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .numeric-input::placeholder { color: var(--muted-2); font-family: 'Inter', sans-serif; font-size: 13px; }
+  .unit { flex: none; padding: 0 12px; color: var(--muted); font-size: 12px; border-left: 1px solid var(--line); height: 26px; display: flex; align-items: center; }
+
+  /* Attempt intro / rules */
+  .attempt-intro { padding: 10px 0 18px; }
+  .attempt-intro h1 { font-size: 34px; line-height: 1.06; margin: 6px 0 0; }
+  .rules-card { margin-bottom: 14px; }
+  .rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  .rules li { display: flex; gap: 9px; align-items: flex-start; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+  .rules li .icon { color: var(--accent); margin-top: 2px; }
+
+  /* Result */
+  .result-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 22px; }
+  .score-ring { width: 156px; height: 156px; position: relative; margin-bottom: 18px; }
+  .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .score-ring .track { fill: none; stroke: var(--surface-2); stroke-width: 9; }
+  .score-ring .meter { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; transition: stroke-dasharray .8s ease; }
+  .score-ring .meter.mid { stroke: var(--mid); }
+  .score-ring .meter.low { stroke: var(--low); }
+  .score-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-pct { font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1; letter-spacing: -.02em; }
+  .score-frac { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+  .result-hero h1 { font-size: 30px; line-height: 1.05; margin: 6px 0 7px; }
+  .result-hero p { font-size: 12.5px; margin: 0; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 13px; }
+  .stat-label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .stat-value { font-size: 14.5px; font-weight: 650; letter-spacing: -.01em; }
+  .stat-value.small { font-size: 11.5px; font-weight: 550; color: var(--ink-2); }
+  .saved-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--good); background: var(--good-soft); border-radius: 99px; padding: 4px 9px; margin-bottom: 14px; }
+
+  /* Import */
+  .import-target { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 8px 10px; margin-bottom: 14px; }
+  .import-target .icon { color: var(--accent); }
+  .dropzone {
+    border: 1.5px dashed var(--line-strong); border-radius: 18px; padding: 28px 18px 22px;
+    text-align: center; background: var(--surface); transition: border-color .15s ease, background .15s ease;
+  }
+  .dropzone.dragging { border-color: var(--accent); background: var(--accent-soft); }
+  .drop-icon { width: 52px; height: 52px; border-radius: 16px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin: 0 auto 13px; }
+  .dropzone h2 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 24px; margin: 0 0 5px; }
+  .dropzone p { color: var(--muted); font-size: 12px; margin: 0 0 15px; }
+  .dropzone .btn { min-width: 160px; }
+  .drop-links { margin-top: 13px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .file-list { display: flex; flex-direction: column; gap: 9px; margin-top: 14px; }
+  .file-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 13px; }
+  .file-card.invalid { border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+  .file-head { display: flex; align-items: center; gap: 9px; }
+  .file-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--surface-2); color: var(--muted); display: grid; place-items: center; flex: none; }
+  .file-card.valid .file-icon { background: var(--good-soft); color: var(--good); }
+  .file-card.invalid .file-icon { background: var(--danger-soft); color: var(--danger); }
+  .file-name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-size { display: block; font-size: 10.5px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+  .status-chip { font-size: 9.5px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; flex: none; }
+  .status-chip.valid { background: var(--good-soft); color: var(--good); }
+  .status-chip.invalid { background: var(--danger-soft); color: var(--danger); }
+  .status-chip.reading { background: var(--mid-soft); color: var(--mid); }
+  .file-title { font-size: 13px; font-weight: 600; margin: 10px 0 3px; }
+  .file-meta { font-size: 11px; color: var(--muted); }
+  .repair-note { margin-top: 8px; font-size: 10.8px; color: var(--mid); background: var(--mid-soft); border-radius: 8px; padding: 6px 8px; line-height: 1.4; }
+  .file-errors { margin: 8px 0 0; padding-left: 16px; color: var(--danger); font-size: 11px; line-height: 1.45; }
+  .file-errors li { margin: 3px 0; }
+  .batch-summary { display: flex; justify-content: space-between; gap: 10px; padding: 12px 2px 2px; font-size: 11px; color: var(--muted); }
+  .import-footer { flex-wrap: wrap; }
+  .import-footer .footer-progress { min-width: 90px; }
+
+  /* Sheet */
+  .overlay { position: absolute; inset: 0; z-index: 100; display: flex; flex-direction: column; justify-content: flex-end; }
+  .backdrop { position: absolute; inset: 0; background: rgba(8, 10, 7, .42); animation: fade-in .18s ease; }
+  .sheet {
+    position: relative; z-index: 1; background: var(--surface); border-radius: 24px 24px 0 0;
+    padding: 10px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 84%; overflow-y: auto;
+    animation: sheet-up .24s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 -10px 40px rgba(0,0,0,.18);
+  }
+  .grabber { width: 36px; height: 4px; border-radius: 99px; background: var(--line-strong); margin: 0 auto 14px; }
+  .sheet h3 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 24px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sheet .sheet-sub { color: var(--muted); font-size: 12.5px; margin: 0 0 16px; line-height: 1.5; }
+  .sheet .sheet-actions { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; }
+  .sheet .sheet-actions.row-actions { gap: 2px; }
+  .sheet .action-row { display: flex; align-items: center; gap: 11px; padding: 12px 4px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; width: 100%; font-size: 13.5px; }
+  .sheet .action-row:last-child { border-bottom: 0; }
+  .sheet .action-row:hover { background: var(--surface-2); }
+  .sheet .action-row.destructive { color: var(--danger); }
+  .sheet .action-row .icon { color: var(--muted); }
+  .sheet .action-row.destructive .icon { color: var(--danger); }
+  .danger-copy { background: var(--danger-soft); color: var(--danger); border-radius: 10px; padding: 10px 12px; font-size: 11.5px; line-height: 1.45; margin: 14px 0 4px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+  .input {
+    height: 46px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--bg);
+    padding: 0 12px; font-size: 14px; outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field-error { color: var(--danger); font-size: 11px; min-height: 15px; }
+  .dialog-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .dialog-actions .btn { flex: 1; }
+
+  /* Toast */
+  #toast-root { position: absolute; left: 0; right: 0; bottom: 88px; z-index: 40; display: flex; justify-content: center; pointer-events: none; padding: 0 20px; }
+  .toast {
+    max-width: 320px; background: #24261f; color: #f4f5ef; border-radius: 12px; padding: 10px 14px;
+    font-size: 12px; line-height: 1.4; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    animation: toast-in .18s ease; text-align: center;
+  }
+  [data-theme="dark"] .toast { background: #e7e9e1; color: #171914; }
+  .toast .icon { display: inline-block; vertical-align: -3px; margin-right: 4px; }
+
+  /* Dev tools */
+  .devtools {
+    width: 310px; flex: none; position: sticky; top: 28px; align-self: flex-start;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 15px;
+    box-shadow: var(--shadow-sm); font-size: 12px;
+  }
+  .dev-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .dev-head strong { font-size: 13px; letter-spacing: -.01em; }
+  .dev-badge { font-size: 9px; font-weight: 800; letter-spacing: .1em; color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; }
+  .dev-section { border-top: 1px solid var(--line); padding: 12px 0 2px; margin-top: 12px; }
+  .dev-section:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+  .dev-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; color: var(--muted); font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; }
+  .dev-select { width: 100%; height: 36px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--bg); padding: 0 8px; font-size: 12px; outline: none; }
+  .segment { display: flex; gap: 3px; background: var(--surface-2); border-radius: 8px; padding: 3px; }
+  .segment button { flex: 1; border: 0; background: transparent; border-radius: 6px; padding: 5px 2px; font-size: 10.5px; font-weight: 600; color: var(--muted); }
+  .segment button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .dev-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dev-buttons .btn { flex: 1; min-height: 34px; font-size: 11.5px; padding: 0 8px; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; font-size: 12px; }
+  .switch { position: relative; width: 36px; height: 21px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider { position: absolute; inset: 0; background: var(--surface-3); border-radius: 99px; }
+  .switch .slider::before { content: ''; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.15); transition: transform .18s ease; }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(15px); }
+  .netlog { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 11px; }
+  .netlog-head { display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+  .netlog-list { list-style: none; margin: 0; padding: 0; max-height: 154px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; line-height: 1.55; }
+  .netlog-list li { display: flex; gap: 6px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
+  .netlog-list li:last-child { border-bottom: 0; }
+  .netlog-list .method { color: var(--muted); width: 30px; flex: none; }
+  .netlog-list .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .netlog-list .status { font-weight: 700; }
+  .status-2 { color: var(--good); }
+  .status-4 { color: var(--mid); }
+  .status-5 { color: var(--danger); }
+  .dev-note { color: var(--muted-2); font-size: 10px; line-height: 1.45; margin-top: 9px; }
+
+  /* Screenshot mode */
+  .screenshot-mode .devtools { display: none; }
+  .screenshot-mode .stage { padding: 0; min-height: 100vh; align-items: center; }
+  .screenshot-mode .device { width: 390px; height: 844px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .screenshot-mode .device-screen { border-radius: 0; }
+  .screenshot-mode .statusbar, .screenshot-mode .home-indicator { display: none; }
+  .screenshot-exit {
+    display: none; position: fixed; right: 18px; bottom: 18px; z-index: 100;
+    background: var(--surface); border: 1px solid var(--line-strong); border-radius: 99px;
+    padding: 9px 14px; font-size: 12px; font-weight: 600; box-shadow: var(--shadow-sm);
+  }
+  .screenshot-mode .screenshot-exit { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes sheet-up { from { transform: translateY(28px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  @media (max-width: 1120px) {
+    .stage { flex-direction: column; align-items: center; }
+    .device-wrap { position: static; }
+    .devtools { position: static; width: min(394px, 100%); }
+  }
+  @media (max-width: 560px) {
+    body { background-image: none; }
+    .stage { padding: 0; display: block; }
+    .device-wrap { width: 100%; }
+    .device { width: 100%; height: 100dvh; padding: 0; border-radius: 0; box-shadow: none; }
+    .device-screen { width: 100%; height: 100dvh; border-radius: 0; }
+    .statusbar, .home-indicator { display: none; }
+    .devtools { margin: 16px; width: calc(100% - 32px); position: static; }
+    .appbar { height: 52px; }
+    .content { padding-left: 16px; padding-right: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="device-wrap">
+    <div class="device">
+      <div class="device-screen">
+        <div class="statusbar">
+          <span>9:41</span>
+          <span class="status-icons">
+            <span class="bars"><i></i><i></i><i></i><i></i></span>
+            <span class="mono" style="font-size:10px;font-weight:700;letter-spacing:-.04em;">5G</span>
+            <span class="battery"><i></i></span>
+          </span>
+        </div>
+        <div class="app" id="app">
+          <div id="screen"></div>
+          <div id="toast-root"></div>
+          <div id="overlay-root"></div>
+        </div>
+        <div class="home-indicator"><i></i></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="devtools" id="devtools" aria-label="Mock developer tools">
+    <div class="dev-head">
+      <strong>Mock controls</strong>
+      <span class="dev-badge">DEV</span>
+    </div>
+
+    <div class="dev-section">
+      <div class="dev-label">Screen jump</div>
+      <select class="dev-select" id="dev-screen" aria-label="Jump to screen">
+        <option value="/">All folders (root)</option>
+        <option value="/folders/f-net">Folder · Computer Networks</option>
+        <option value="/folders/f-net-transport">Folder · Transport Layer</option>
+        <option value="/folders/f-empty">Folder · Archive (empty)</option>
+        <option value="/quizzes/q-ipv4">Quiz · IPv4 addressing</option>
+        <option value="/quizzes/q-ipv4/attempt">Attempt · pre-start</option>
+        <option value="/attempts/a-ipv4-10">Result · latest IPv4 attempt</option>
+        <option value="/import?folder=f-net">Import into Computer Networks</option>
+        <option value="/does-not-exist">Not found</option>
+      </select>
+    </div>
+
+    <div class="dev-section">
+      <div class="dev-label">Data</div>
+      <div class="dev-buttons">
+        <button class="btn secondary" data-dev="reset" type="button">Reset data</button>
+        <button class="btn secondary" data-dev="sample" type="button">Sample import</button>
+      </div>
+      <div class="dev-buttons" style="margin-top:6px;">
+        <button class="btn secondary" data-dev="invalid" type="button">Invalid import</button>
+        <button class="btn secondary" data-dev="empty" type="button">Empty folder</button>
+      </div>
+    </div>
+
+    <div class="dev-section">
+      <div class="dev-label"><span>Latency</span><span id="latency-value">350 ms</span></div>
+      <div class="segment" id="latency-segment">
+        <button type="button" data-latency="0">0</button>
+        <button type="button" data-latency="150">150</button>
+        <button type="button" data-latency="350" class="active">350</button>
+        <button type="button" data-latency="700">700</button>
+      </div>
+    </div>
+
+    <div class="dev-section">
+      <div class="dev-label"><span>Error rate</span><span id="error-value">0%</span></div>
+      <div class="segment" id="error-segment">
+        <button type="button" data-error="0" class="active">0%</button>
+        <button type="button" data-error="10">10%</button>
+        <button type="button" data-error="30">30%</button>
+        <button type="button" data-error="100">100%</button>
+      </div>
+    </div>
+
+    <div class="dev-section">
+      <div class="switch-row"><span>Offline</span><label class="switch"><input type="checkbox" id="dev-offline"><span class="slider"></span></label></div>
+      <div class="switch-row"><span>Dark theme</span><label class="switch"><input type="checkbox" id="dev-dark"><span class="slider"></span></label></div>
+      <div class="switch-row"><span>Screenshot mode</span><label class="switch"><input type="checkbox" id="dev-shot"><span class="slider"></span></label></div>
+    </div>
+
+    <div class="netlog">
+      <div class="netlog-head"><span>Network log</span><span id="netlog-count">0</span></div>
+      <ul class="netlog-list" id="netlog-list"></ul>
+      <div class="dev-note">All requests go through the fake HTTP layer. Nothing leaves this page.</div>
+    </div>
+  </aside>
+</div>
+
+<button class="screenshot-exit" id="screenshot-exit" type="button">Exit screenshot mode</button>
+
+<script type="text/plain" id="sample-quiz-json">
+{"title": "Computer Networks, Lecture 1: Classful IPv4 Addressing", "subtitle": "Classes, leading bits, first-octet ranges, reserved patterns, and practical network and host counts", "key": "computernetworks-l01-quiz",
+"questions": [
+{"t":"MCQ","d":"Medium","q":"What fraction of the whole IPv4 address space belongs to Class C?","o":["1/4","1/8","1/16","1/2"],"a":1,"e":"Class C fixes 3 leading bits, so it holds \(2^{29}\) addresses out of \(2^{32}\), which is 1/8 (12.5%). 1/4 is Class B (2 fixed bits), 1/2 is Class A, and 1/16 is each of Class D and Class E."},
+{"t":"MCQ","d":"Medium","q":"An IPv4 address in binary begins 1011 0000. To which class does it belong?","o":["Class A","Class B","Class C","Class D"],"a":1,"e":"The first bit is 1, so it is not Class A; the first two bits are 10, which is the Class B prefix. Class C would need the prefix 110 and Class D would need 1110. The prefixes never overlap, so the answer is unique."},
+{"t":"MCQ","d":"Medium","q":"The first octet of an address is 200. Which class is it?","o":["Class A","Class B","Class C","Class D"],"a":2,"e":"Class C covers first octets 192 to 223, and 200 lies in that range. Class B stops at 191, so 200 is not Class B, and Class D starts at 224."},
+{"t":"MCQ","d":"Medium","q":"How many networks can be formed in Class A in practice?","o":["128","126","256","\(2^{24}\)"],"a":1,"e":"Seven bits are free (the first bit is fixed at 0), giving \(2^7 = 128\) combinations, but network 0 (all zeros) and network 127 (loopback) are reserved, so \(128 - 2 = 126\). The value 128 forgets the removal, 256 ignores the fixed bit, and \(2^{24}\) is the host count scale."},
+{"t":"MCQ","d":"Medium","q":"How many usable host addresses does one Class C network have?","o":["256","254","255","\(2^{21}\)"],"a":1,"e":"The host ID is 8 bits, giving 256 combinations, but the all-0 and all-1 host IDs cannot be assigned, so 254 remain. 256 forgets the removal, 255 removes only one, and \(2^{21}\) is the number of Class C networks, not hosts."},
+{"t":"MCQ","d":"Hard","q":"The first octet of a Class B address ranges over only 64 values (128 to 191), yet Class B has \(2^{14}\) networks. What explains this?","o":["The second octet is part of the Class B network ID and has 256 values for each first-octet value","Class B uses 14 bits of its host ID for networks","The range 128 to 191 contains \(2^{14}\) values","Some networks are reused across several first-octet values"],"a":0,"e":"The Class B network ID is 16 bits (two octets). With 64 first-octet values and 256 second-octet values each, there are \(64 \times 256 = 2^6 \times 2^8 = 2^{14}\) networks. The range 128 to 191 holds just 64 values, not \(2^{14}\), and the host ID is not involved in counting networks."},
+{"t":"MCQ","d":"Medium","q":"Which of these addresses is reserved for loopback testing and inter-process communication on the same machine?","o":["10.0.0.1","127.0.0.1","192.168.0.1","128.0.0.1"],"a":1,"e":"The 127.x.x.x block is reserved for self-connectivity, loopback testing and inter-process communication, so it can never be given to a computer. The other addresses belong to ordinary Class A, C and B ranges."},
+{"t":"MCQ","d":"Hard","q":"What is the practical number of networks in Class B?","o":["\(2^{16}\)","\(2^{14}\)","\(2^{14}-2\)","\(2^{15}\)"],"a":1,"e":"Two of the 16 network bits are fixed to 10, leaving 14 free bits, so \(2^{14}\) networks. Nothing is subtracted because with the prefix 10 the network ID can never be all 0s or all 1s, which rules out \(2^{14}-2\). \(2^{16}\) is the theoretical count."},
+{"t":"MCQ","d":"Medium","q":"Which of the following dotted decimal addresses is invalid?","o":["172.16.255.0","10.0.256.1","200.0.0.255","127.0.0.1"],"a":1,"e":"Each octet is 8 bits, so it can only be 0 to 255. The value 256 in the third octet of 10.0.256.1 is impossible. The others are well-formed addresses, even if some are not assignable to a computer."},
+{"t":"MCQ","d":"Hard","q":"What fraction of the address space is Class D and Class E taken together?","o":["1/16","1/8","1/4","1/32"],"a":1,"e":"Each of D and E fixes 4 bits and holds \(2^{28}\) addresses, so together \(2^{29}\), which is \(2^{29}/2^{32} = 1/8\), or 12.5%. The value 1/16 is only one of them, and 1/4 is Class B."},
+{"t":"MCQ","d":"Hard","q":"A student cancels 255 from the Class E first-octet range because it looks like all ones. Why is this wrong?","o":["Class E has no network ID or host ID, so the all-0 and all-1 rules do not apply to it","255 is a valid Class D value","The all-ones rule applies only to the first octet, and 255 is the last","The rule removes 240, not 255"],"a":0,"e":"The all-0 and all-1 rules are about the network ID and host ID. Class E has neither, so no value in 240 to 255 is cancelled by those rules. The other reasons are made up: 255 is not Class D, and the rule is not tied to the first octet alone."},
+{"t":"MCQ","d":"Medium","q":"Which first-octet value is a usable Class A network?","o":["0","127","126","128"],"a":2,"e":"Usable Class A first octets are 1 to 126. The value 0 is an all-zero network ID, 127 is reserved for loopback, and 128 belongs to Class B."},
+{"t":"MCQ","d":"Hard","q":"In Class B the number of networks is \(2^m\) and the number of usable hosts per network is \(2^n - 2\). What is the ratio \(m/n\)?","o":["7/8","1","14/15","3/4"],"a":0,"e":"Practical Class B has 14 free network bits, so \(m = 14\), and 16 host bits, so \(n = 16\). Thus \(m/n = 14/16 = 7/8\). Using the theoretical 16 for m would wrongly give 1."},
+{"t":"MCQ","d":"Hard","q":"Suppose a Class B style address keeps the leading bits 10 but uses 20 bits for the network ID. How many usable hosts does each network have?","o":["4096","4094","1022","\(2^{18}\)"],"a":1,"e":"The host ID is the remaining \(32 - 20 = 12\) bits, so \(2^{12} = 4096\) combinations, minus the all-0 and all-1 host IDs gives 4094. 4096 forgets the removal, \(2^{18}\) is the number of networks, and 1022 would correspond to 10 host bits."},
+{"t":"MCQ","d":"Medium","q":"For what purpose are Class D addresses reserved?","o":["Multicasting","Research and future use","Loopback testing","Assigning to large networks"],"a":0,"e":"Class D (first octet 224 to 239) is used for multicasting; the meaning of multicasting is the subject of the next lecture. Research and future use is Class E, and loopback is the 127 block of Class A."},
+{"t":"MSQ","d":"Medium","q":"Which of the following give the correct leading bits of the class?","o":["Class A: 0","Class B: 10","Class C: 111","Class E: 1111"],"a":[0,1,3],"e":"Class A starts with 0, Class B with 10 and Class E with 1111. Class C starts with 110, not 111; the pattern 111 is shared by Classes D and E before the fourth bit separates them."},
+{"t":"MSQ","d":"Medium","q":"Which of these addresses cannot be assigned to a computer?","o":["10.0.0.0","10.255.255.255","127.0.0.5","10.0.0.1"],"a":[0,1,2],"e":"10.0.0.0 has an all-zero host ID, 10.255.255.255 has an all-one host ID, and 127.0.0.5 is in the loopback block. 10.0.0.1 is an ordinary valid Class A host address, since only the two extreme host patterns are removed."},
+{"t":"MSQ","d":"Medium","q":"Which first-octet values belong to Class B?","o":["128","191","192","150"],"a":[0,1,3],"e":"Class B spans 128 to 191, so 128, 191 and 150 are inside. 192 is the first Class C value."},
+{"t":"MSQ","d":"Medium","q":"Which classes have no network ID and no host ID?","o":["Class A","Class B","Class D","Class E"],"a":[2,3],"e":"Classes D and E use the whole address as a single unit (multicasting, and research or future use). Classes A and B are both split into a network ID and a host ID."},
+{"t":"MSQ","d":"Hard","q":"Which statements about Class A are correct?","o":["The usable first octets are 1 to 126","The host ID has 24 bits","Seven bits of the network ID are free","The practical number of networks is \(2^8\)"],"a":[0,1,2],"e":"The first bit is fixed at 0, so 7 of the 8 network bits are free; with 0 and 127 removed, the usable first octets are 1 to 126; the host ID is 24 bits. The practical network count is \(2^7 - 2 = 126\), not \(2^8\), which is the theoretical figure."},
+{"t":"MSQ","d":"Hard","q":"In which classes is the practical number of networks exactly \(2^{\text{free network bits}}\), with nothing subtracted?","o":["Class A","Class B","Class C"],"a":[1,2],"e":"With prefixes 10 and 110 the network ID can never be all 0s or all 1s, so nothing is cancelled and the counts are \(2^{14}\) and \(2^{21}\). In Class A the network 0 and the loopback network 127 are removed, giving \(2^7 - 2\)."},
+{"t":"MSQ","d":"Hard","q":"Which statements about the sizes of the classes are correct?","o":["Class D and Class E have the same number of addresses","Class C has twice as many addresses as Class D","Class A has twice as many addresses as Class B","Class B has the same number of addresses as Class C"],"a":[0,1,2],"e":"Each class fixes one more bit than the previous (except D and E, which both fix 4), so sizes are \(2^{31}, 2^{30}, 2^{29}, 2^{28}, 2^{28}\). Hence D equals E, C is twice D, and A is twice B. B (\(2^{30}\)) is twice C (\(2^{29}\)), not equal to it."},
+{"t":"MSQ","d":"Medium","q":"Which hexadecimal-to-decimal conversions of a single octet are correct?","o":["C2 = 194","2F = 47","B5 = 181","FF = 256"],"a":[0,1,2],"e":"C2: \(12 \times 16 + 2 = 194\). 2F: \(2 \times 16 + 15 = 47\). B5: \(11 \times 16 + 5 = 181\). FF is \(15 \times 16 + 15 = 255\), not 256, since an octet never exceeds 255."},
+{"t":"MSQ","d":"Medium","q":"Which first-octet values belong to Class C?","o":["192","200","223","224"],"a":[0,1,2],"e":"Class C covers 192 to 223. The value 224 is the first Class D value."},
+{"t":"MSQ","d":"Hard","q":"An address has first octet 150. Which statements are correct?","o":["It is Class B","Its network ID is 16 bits","Its host ID is 16 bits","Each network of its class has \(2^{16}\) usable hosts"],"a":[0,1,2],"e":"150 lies in 128 to 191, so Class B, which splits 16 and 16. The usable hosts per network are \(2^{16} - 2\), not \(2^{16}\), because the all-0 and all-1 host IDs are removed."},
+{"t":"NAT","d":"Medium","q":"Convert the hexadecimal octet D4 to decimal.","a":212,"e":"D is 13, so \(13 \times 16 + 4 = 208 + 4 = 212\). The common error is to multiply the right digit instead of the left by 16."},
+{"t":"NAT","d":"Medium","q":"How many usable host addresses does a network have if its host ID is 10 bits long? Assume the all-0 and all-1 host IDs are not assignable.","a":1022,"e":"There are \(2^{10} = 1024\) host combinations; removing the all-0 and all-1 ones leaves 1022. Giving 1024 forgets the reserved patterns.","u":"hosts"},
+{"t":"NAT","d":"Medium","q":"The practical number of Class C networks is \(2^x\). Find x.","a":21,"e":"The network ID is 24 bits and 3 are fixed by the prefix 110, so 21 bits vary. Nothing is removed. Answering 24 is the theoretical figure."},
+{"t":"NAT","d":"Medium","q":"How many networks can Class A have in practice?","a":126,"e":"\(2^7 = 128\) combinations of the free bits, minus the all-zero network and the loopback network 127, gives 126. The figure 128 forgets the two reserved networks."},
+{"t":"NAT","d":"Medium","q":"Convert the binary octet 11101110 to decimal.","a":238,"e":"The two 0 bits have weights 16 and 1, total 17, so \(255 - 17 = 238\). Checking: \(128+64+32+8+4+2 = 238\)."},
+{"t":"NAT","d":"Medium","q":"How many usable hosts can one Class B network have?","a":65534,"e":"The host ID is 16 bits, so \(2^{16} = 65536\) combinations, minus 2 reserved patterns gives 65534. The value 65536 forgets the subtraction.","u":"hosts"},
+{"t":"NAT","d":"Medium","q":"How many different values does the first octet take across Class D (224 to 239)?","a":16,"e":"The values are 224 through 239 inclusive, and \(239 - 224 + 1 = 16\), which is also \(2^4\) because four bits of the first octet are free. Answering 15 forgets the +1."},
+{"t":"NAT","d":"Medium","q":"What percentage of all addresses do Class D and Class E hold together?","a":12.5,"e":"Each holds 6.25%, so together 12.5%. Each class fixes 4 bits, so each is \(2^{28}/2^{32} = 1/16\).","u":"%"},
+{"t":"NAT","d":"Hard","q":"A Class B style address keeps the leading bits 10 but uses 20 bits for the network ID. The number of networks is \(2^x\). Find x.","a":18,"e":"Of the 20 network bits, 2 are the fixed prefix 10, leaving 18 free bits, so \(2^{18}\) networks (nothing is cancelled because of the fixed prefix). Answering 20 forgets the fixed bits."},
+{"t":"NAT","d":"Medium","q":"Convert the binary octet 11111001 to decimal.","a":249,"e":"The 0 bits have weights 4 and 2, total 6, so \(255 - 6 = 249\)."}
+]}
+
+</script>
+
+<script src="assets/katex/katex.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     0. Utilities
+     ============================================================ */
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var uuid = function () {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return 'id-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
+  };
+  var plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
+  var clamp = function (n, a, b) { return Math.max(a, Math.min(b, n)); };
+
+  var dateFmt = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  var timeFmt = new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' });
+  function formatDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return dateFmt.format(d) + ', ' + timeFmt.format(d);
+  }
+  function formatDurationLong(ms) {
+    var total = Math.max(0, Math.round(ms / 1000));
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    if (m >= 60) return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+    if (m === 0) return s + 's';
+    return m + 'm ' + s + 's';
+  }
+  function formatClock(ms) {
+    var total = Math.max(0, Math.floor(ms / 1000));
+    var h = Math.floor(total / 3600);
+    var m = Math.floor((total % 3600) / 60);
+    var s = total % 60;
+    return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
+  }
+  function formatBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+  function pct(score, max) { return max > 0 ? Math.round((score / max) * 100) : 0; }
+  function scoreClass(p) { return p >= 80 ? 'good' : p >= 60 ? 'mid' : 'low'; }
+
+  function rich(text) {
+    if (!text) return '';
+    var src = String(text);
+    var parts = src.split(/(\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g);
+    return parts.map(function (part) {
+      if (part.indexOf('\\(') === 0 && part.slice(-2) === '\\)') {
+        return katexSafe(part.slice(2, -2), false);
+      }
+      if (part.indexOf('\\[') === 0 && part.slice(-2) === '\\]') {
+        return katexSafe(part.slice(2, -2), true);
+      }
+      return esc(part).replace(/\n/g, '<br>');
+    }).join('');
+  }
+  function katexSafe(tex, displayMode) {
+    try {
+      return katex.renderToString(tex, { throwOnError: false, displayMode: !!displayMode, strict: 'ignore' });
+    } catch (e) {
+      return '<code>' + esc(tex) + '</code>';
+    }
+  }
+
+  /* ============================================================
+     1. Icons (Lucide, MIT)
+     ============================================================ */
+  var ICONS = {
+    folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+    folderPlus: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="M9 13h6"/>',
+    file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    play: '<path d="m8 5 11 7-11 7Z"/>',
+    chevronRight: '<path d="m9 18 6-6-6-6"/>',
+    arrowLeft: '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+    plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+    more: '<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    check: '<path d="m20 6-11 11-5-5"/>',
+    alert: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/>',
+    refresh: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/>',
+    timer: '<path d="M10 2h4"/><path d="M12 14v-4"/><circle cx="12" cy="14" r="8"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    wifiOff: '<path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 3-1.8"/><path d="M15.5 10.7a10 10 0 0 1 3.5 1.8"/><path d="M2 8.8a15 15 0 0 1 4-2.2"/><path d="M18 6.6a15 15 0 0 1 4 2.2"/><path d="M12 20h.01"/>',
+    circleCheck: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    circleX: '<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/>',
+    chevronDown: '<path d="m6 9 6 6 6-6"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+    moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'
+  };
+  function icon(name, size, cls) {
+    var s = size || 20;
+    return '<svg class="icon ' + (cls || '') + '" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
+  }
+
+  /* ============================================================
+     2. Import parser (shared by seed and import screen)
+     ============================================================ */
+  var SAMPLE_TEXT = (document.getElementById('sample-quiz-json') || {}).textContent || '';
+  SAMPLE_TEXT = SAMPLE_TEXT.trim();
+
+  var INVALID_SAMPLE = [
+    '{',
+    '  "title": "",',
+    '  "questions": [',
+    '    { "t": "MCQ", "q": "This question is missing a usable answer.", "o": ["Only one option"], "a": 5 },',
+    '    { "t": "XYZ", "q": "This question has an unsupported type.", "o": ["A", "B"], "a": 0 }',
+    '  ]',
+    '}'
+  ].join('\n');
+
+  function repairJsonEscapes(src) {
+    var out = '';
+    var inString = false;
+    for (var i = 0; i < src.length; i++) {
+      var ch = src[i];
+      if (!inString) {
+        out += ch;
+        if (ch === '"') inString = true;
+        continue;
+      }
+      if (ch === '\\') {
+        var next = src[i + 1];
+        if (next === '"' || next === '\\') {
+          out += '\\' + next;
+          i++;
+        } else {
+          out += '\\\\';
+        }
+        continue;
+      }
+      out += ch;
+      if (ch === '"') inString = false;
+    }
+    return out;
+  }
+
+  var LATEX_CMD = /(times|text|frac|sqrt|le|ge|neq|pm|cdot|pi|alpha|beta|gamma|theta|lambda|sigma|omega|left|right|begin|end)\b/;
+  function needsRepair(src) {
+    if (/(^|[^\\])\\(?!["\\/bfnrtu])/.test(src)) return true;
+    if (/(^|[^\\])\\(?:times|text|frac|sqrt|le|ge|neq|pm|cdot|pi|alpha|beta|gamma|theta|lambda|sigma|omega|left|right|begin|end)\b/.test(src)) return true;
+    return false;
+  }
+
+  function parseJsonLoose(src) {
+    var text = String(src || '');
+    var repaired = needsRepair(text);
+    try {
+      return { value: JSON.parse(repaired ? repairJsonEscapes(text) : text), repaired: repaired };
+    } catch (e) {
+      try {
+        return { value: JSON.parse(repairJsonEscapes(text)), repaired: true };
+      } catch (e2) {
+        throw new Error('This file contains malformed JSON.');
+      }
+    }
+  }
+
+  function canonicalizeQuiz(raw) {
+    var errors = [];
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      return { errors: ['The file does not contain a quiz object.'] };
+    }
+    var title = typeof raw.title === 'string' ? raw.title.trim() : '';
+    if (!title) errors.push('The quiz needs a title.');
+    if (title.length > 120) errors.push('The quiz title must be 120 characters or fewer.');
+
+    var rawQuestions = Array.isArray(raw.questions) ? raw.questions : [];
+    if (!rawQuestions.length) errors.push('This quiz has no questions.');
+    if (rawQuestions.length > 1000) errors.push('This quiz exceeds 1,000 questions.');
+
+    var questions = [];
+    rawQuestions.forEach(function (q, i) {
+      var n = i + 1;
+      var typeRaw = String((q && q.t) || '').trim().toUpperCase();
+      var type = typeRaw === 'MCQ' ? 'mcq' : typeRaw === 'MSQ' ? 'msq' : typeRaw === 'NAT' ? 'numerical' : null;
+      if (!type) { errors.push('Question ' + n + ' has an unsupported type.'); return; }
+
+      var prompt = typeof q.q === 'string' ? q.q.trim() : '';
+      if (!prompt) { errors.push('Question ' + n + ' has no question text.'); return; }
+
+      var difficulty = typeof q.d === 'string' ? q.d.trim().toLowerCase() : null;
+      if (difficulty && ['easy', 'medium', 'hard'].indexOf(difficulty) === -1) difficulty = null;
+      var explanation = typeof q.e === 'string' ? q.e.trim() : null;
+      var unit = typeof q.u === 'string' ? q.u.trim() : null;
+
+      if (type === 'numerical') {
+        var answer = Number(q.a);
+        if (!isFinite(answer)) { errors.push('Question ' + n + ' needs a numeric answer.'); return; }
+        var tolerance = Number(q.tolerance);
+        if (!isFinite(tolerance) || tolerance < 0) tolerance = 0;
+        questions.push({
+          prompt: prompt, type: type, marks: 1, position: i,
+          difficulty: difficulty, explanation: explanation, unit: unit,
+          numerical_answer: answer, tolerance: tolerance, options: []
+        });
+        return;
+      }
+
+      var rawOptions = Array.isArray(q.o) ? q.o : [];
+      if (rawOptions.length < 2) errors.push('Question ' + n + ' needs at least two options.');
+      var seen = Object.create(null);
+      var options = [];
+      rawOptions.forEach(function (text, j) {
+        var t = typeof text === 'string' ? text.trim() : '';
+        if (!t) errors.push('Question ' + n + ' has an empty option.');
+        var key = t.toLowerCase();
+        if (t && seen[key]) errors.push('Question ' + n + ' has a repeated option.');
+        seen[key] = true;
+        options.push({ text: t, is_correct: false, position: j });
+      });
+
+      if (type === 'mcq') {
+        if (!Number.isInteger(q.a) || q.a < 0 || q.a >= rawOptions.length) {
+          errors.push('Question ' + n + ' must have exactly one correct option.');
+        } else if (options[q.a]) {
+          options[q.a].is_correct = true;
+        }
+      } else {
+        var correct = Array.isArray(q.a) ? q.a : [];
+        var bad = !correct.length || correct.some(function (x) { return !Number.isInteger(x) || x < 0 || x >= rawOptions.length; });
+        var unique = new Set(correct);
+        if (bad || unique.size !== correct.length) {
+          errors.push('Question ' + n + ' must have at least one correct option.');
+        } else {
+          correct.forEach(function (idx) { if (options[idx]) options[idx].is_correct = true; });
+        }
+      }
+
+      questions.push({
+        prompt: prompt, type: type, marks: 1, position: i,
+        difficulty: difficulty, explanation: explanation, unit: unit,
+        numerical_answer: null, tolerance: null, options: options
+      });
+    });
+
+    return {
+      errors: Array.from(new Set(errors)),
+      quiz: {
+        title: title,
+        subtitle: typeof raw.subtitle === 'string' ? raw.subtitle.trim().slice(0, 240) : null,
+        source_key: typeof raw.key === 'string' ? raw.key.trim() : null,
+        questions: questions
+      }
+    };
+  }
+
+  /* ============================================================
+     3. Seed data
+     ============================================================ */
+  var BASE_TIME = new Date('2026-11-22T09:00:00.000Z');
+  var DB_KEY = 'quiz_app_mock_v1';
+
+  function buildSeed() {
+    var folders = [
+      { id: 'f-net', name: 'Computer Networks', parent_folder_id: null, created_at: '2026-08-14T09:10:00Z' },
+      { id: 'f-net-transport', name: 'Transport Layer', parent_folder_id: 'f-net', created_at: '2026-08-20T11:30:00Z' },
+      { id: 'f-physics', name: 'Physics', parent_folder_id: null, created_at: '2026-08-15T14:05:00Z' },
+      { id: 'f-math', name: 'Mathematics', parent_folder_id: null, created_at: '2026-08-16T08:45:00Z' },
+      { id: 'f-chem', name: 'Chemistry', parent_folder_id: null, created_at: '2026-08-18T10:20:00Z' },
+      { id: 'f-bio', name: 'Biology', parent_folder_id: null, created_at: '2026-08-19T16:40:00Z' },
+      { id: 'f-history', name: 'History', parent_folder_id: null, created_at: '2026-08-22T07:55:00Z' },
+      { id: 'f-aptitude', name: 'Aptitude', parent_folder_id: null, created_at: '2026-09-02T12:15:00Z' },
+      { id: 'f-empty', name: 'Archive', parent_folder_id: null, created_at: '2026-09-10T18:00:00Z' }
+    ];
+    var quizzes = [];
+    var questions = [];
+    var options = [];
+    var attempts = [];
+
+    function addQuiz(id, folderId, title, subtitle, createdAt, defs) {
+      quizzes.push({
+        id: id, folder_id: folderId, title: title, subtitle: subtitle || null,
+        source_key: null, created_at: createdAt
+      });
+      defs.forEach(function (d, index) {
+        var qid = 's-' + id.replace(/^q-/, '') + '-q' + (index + 1);
+        var type = d.type || 'mcq';
+        questions.push({
+          id: qid, quiz_id: id, prompt: d.prompt, type: type, marks: 1, position: index,
+          difficulty: d.difficulty || null, explanation: d.explanation || null, unit: d.unit || null,
+          numerical_answer: type === 'numerical' ? d.answer : null,
+          tolerance: type === 'numerical' ? (d.tolerance == null ? 0 : d.tolerance) : null
+        });
+        (d.options || []).forEach(function (text, j) {
+          var correct = type === 'mcq' ? j === d.answer : (Array.isArray(d.answer) && d.answer.indexOf(j) !== -1);
+          options.push({
+            id: qid + '-o' + j, question_id: qid, text: text,
+            is_correct: correct ? 1 : 0, position: j
+          });
+        });
+      });
+    }
+
+    function addAttempts(quizId, entries, maxScore) {
+      entries.forEach(function (entry, index) {
+        var score = entry[0];
+        var daysAgo = entry[1];
+        var minutes = entry[2];
+        var seconds = entry[3] || 0;
+        var start = new Date(BASE_TIME.getTime() - daysAgo * 86400000 - index * 41 * 60000);
+        var duration = (minutes * 60 + seconds) * 1000;
+        var end = new Date(start.getTime() + duration);
+        attempts.push({
+          id: 'a-' + quizId.replace(/^q-/, '') + '-' + (index + 1),
+          quiz_id: quizId,
+          started_at: start.toISOString(),
+          ended_at: end.toISOString(),
+          duration_ms: duration,
+          score: score,
+          max_score: maxScore,
+          answers_json: '{}'
+        });
+      });
+    }
+
+    /* ---- Computer Networks ---- */
+    addQuiz('q-subnet', 'f-net', 'Subnetting Basics', 'Masks, host counts, private ranges and broadcast addresses.', '2026-08-16T10:20:00Z', [
+      { type: 'mcq', prompt: 'How many usable host addresses does a /27 subnet provide?', options: ['30', '32', '14', '62'], answer: 0, difficulty: 'easy', explanation: 'A /27 leaves 5 host bits, so 2^5 - 2 = 30 usable addresses.' },
+      { type: 'mcq', prompt: 'Which subnet mask corresponds to a /26 prefix?', options: ['255.255.255.192', '255.255.255.224', '255.255.255.240', '255.255.255.248'], answer: 0, difficulty: 'medium' },
+      { type: 'msq', prompt: 'Which of these are private IPv4 ranges?', options: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '8.8.8.0/24'], answer: [0, 1, 2], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'How many /24 subnets fit inside a /16?', answer: 256, unit: 'subnets', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'What is the broadcast address of 10.0.0.0/29?', options: ['10.0.0.7', '10.0.0.8', '10.0.0.15', '10.0.0.31'], answer: 0, difficulty: 'hard' },
+      { type: 'numerical', prompt: 'How many usable hosts are in a /30 subnet?', answer: 2, unit: 'hosts', difficulty: 'easy' }
+    ]);
+    addAttempts('q-subnet', [[3, 12, 8, 12], [4, 9, 6, 40], [5, 5, 5, 18], [6, 2, 4, 6]], 6);
+
+    addQuiz('q-tcp', 'f-net-transport', 'TCP & UDP Essentials', 'Connection state, reliability and the transport-layer trade-offs.', '2026-08-21T09:40:00Z', [
+      { type: 'mcq', prompt: 'Which transport protocol is connection-oriented?', options: ['TCP', 'UDP', 'ICMP', 'ARP'], answer: 0, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are TCP features?', options: ['Reliable delivery', 'Ordered bytes', 'Connectionless', 'Flow control'], answer: [0, 1, 3], difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Which protocol is the better fit for a live video call?', options: ['TCP', 'UDP', 'FTP', 'SMTP'], answer: 1, difficulty: 'medium' },
+      { type: 'numerical', prompt: 'How many bits are in a TCP port number?', answer: 16, unit: 'bits', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'What does the TCP three-way handshake establish?', options: ['A connection', 'A route', 'A DNS record', 'A MAC address'], answer: 0, difficulty: 'easy' }
+    ]);
+    addAttempts('q-tcp', [[3, 11, 7, 4], [4, 6, 5, 33]], 5);
+
+    addQuiz('q-dns', 'f-net-transport', 'DNS Resolution', 'Name servers, record types and the lookup path.', '2026-08-23T15:10:00Z', [
+      { type: 'mcq', prompt: 'What does DNS translate?', options: ['Names to IP addresses', 'IP addresses to MAC addresses', 'Ports to protocols', 'Packets to frames'], answer: 0, difficulty: 'easy' },
+      { type: 'mcq', prompt: 'Which record type maps a name to an IPv4 address?', options: ['A', 'AAAA', 'CNAME', 'MX'], answer: 0, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are valid DNS record types?', options: ['A', 'AAAA', 'MX', 'TCP'], answer: [0, 1, 2], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'What is the well-known port for DNS over UDP?', answer: 53, unit: 'port', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Which server answers the final query in a DNS lookup?', options: ['Authoritative name server', 'Root server', 'Recursive resolver', 'Stub resolver'], answer: 0, difficulty: 'hard' }
+    ]);
+    addAttempts('q-dns', [[4, 8, 9, 25]], 5);
+
+    /* ---- Physics ---- */
+    addQuiz('q-motion', 'f-physics', 'Motion & Kinematics', 'Vectors, average speed, acceleration and the equations of motion.', '2026-08-17T11:00:00Z', [
+      { type: 'mcq', prompt: 'Which quantity is a vector?', options: ['Speed', 'Velocity', 'Distance', 'Time'], answer: 1, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'A car travels 100 m in 20 s. What is its average speed in m/s?', answer: 5, unit: 'm/s', difficulty: 'easy' },
+      { type: 'mcq', prompt: 'What is the SI unit of acceleration?', options: ['m/s', 'm/s\u00b2', 'N', 'J'], answer: 1, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are scalar quantities?', options: ['Mass', 'Displacement', 'Temperature', 'Velocity'], answer: [0, 2], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'A body starts from rest and accelerates at 2 m/s\u00b2 for 5 s. What is its final speed in m/s?', answer: 10, unit: 'm/s', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Which equation relates velocity, acceleration and time?', options: ['v = u + at', 'v = u + at\u00b2', 's = ut + 2at', 'v\u00b2 = u + a'], answer: 0, difficulty: 'medium' }
+    ]);
+    addAttempts('q-motion', [[4, 13, 11, 8], [5, 8, 9, 42], [6, 3, 7, 19]], 6);
+
+    addQuiz('q-waves', 'f-physics', 'Waves & Sound', 'Frequency, wavelength, amplitude and wave speed.', '2026-08-25T10:30:00Z', [
+      { type: 'mcq', prompt: 'What is the SI unit of frequency?', options: ['Hertz', 'Metre', 'Second', 'Joule'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'A wave has frequency 50 Hz and wavelength 2 m. What is its speed in m/s?', answer: 100, unit: 'm/s', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Which wave property determines loudness?', options: ['Amplitude', 'Frequency', 'Wavelength', 'Speed'], answer: 0, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are transverse waves?', options: ['Light', 'Sound in air', 'Water ripples', 'Radio waves'], answer: [0, 2, 3], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'What is the period of a 4 Hz wave in seconds?', answer: 0.25, unit: 's', difficulty: 'hard' }
+    ]);
+    addAttempts('q-waves', [[2, 15, 12, 16], [4, 7, 8, 52]], 5);
+
+    /* ---- Mathematics ---- */
+    addQuiz('q-calculus', 'f-math', 'Calculus I: Limits', 'Limits, derivatives and the first rules of differentiation.', '2026-08-17T08:50:00Z', [
+      { type: 'mcq', prompt: 'What is the derivative of \\(x^2\\)?', options: ['2x', 'x', 'x\u00b2/2', '2'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'Evaluate \\(\\lim_{x\\to 0} \\sin(x)/x\\).', answer: 1, difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Which rule differentiates a product of two functions?', options: ['Product rule', 'Chain rule', 'Quotient rule', 'Power rule'], answer: 0, difficulty: 'medium' },
+      { type: 'numerical', prompt: 'What is the derivative of \\(3x + 5\\) at \\(x = 2\\)?', answer: 3, difficulty: 'medium' },
+      { type: 'msq', prompt: 'Which functions are continuous everywhere?', options: ['Polynomials', 'sin x', '1/x', 'e^x'], answer: [0, 1, 3], difficulty: 'hard' },
+      { type: 'mcq', prompt: 'What is the integral of \\(2x\\)?', options: ['x\u00b2 + C', '2 + C', 'x + C', '2x\u00b2 + C'], answer: 0, difficulty: 'medium' }
+    ]);
+    addAttempts('q-calculus', [[3, 12, 13, 7], [5, 6, 9, 45]], 6);
+
+    addQuiz('q-linear', 'f-math', 'Linear Algebra: Vectors', 'Dot products, determinants, orthogonality and magnitude.', '2026-08-27T13:05:00Z', [
+      { type: 'mcq', prompt: 'What is the dot product of (1, 2) and (3, 4)?', options: ['11', '10', '7', '5'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'What is the determinant of [[2, 1], [3, 4]]?', answer: 5, difficulty: 'medium' },
+      { type: 'msq', prompt: 'Which operations are defined for vectors of the same dimension?', options: ['Addition', 'Scalar multiplication', 'Dot product', 'Matrix multiplication'], answer: [0, 1, 2], difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Two non-zero vectors are orthogonal when...', options: ['Their dot product is zero', 'Their sum is zero', 'Their magnitudes are equal', 'They are parallel'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'What is the magnitude of (3, 4)?', answer: 5, difficulty: 'easy' }
+    ]);
+    addAttempts('q-linear', [[4, 4, 8, 30]], 5);
+
+    /* ---- Chemistry ---- */
+    addQuiz('q-organic', 'f-chem', 'Organic Chemistry Basics', 'Alkanes, functional groups and simple IUPAC names.', '2026-08-19T09:25:00Z', [
+      { type: 'mcq', prompt: 'What is the general formula of an alkane?', options: ['CnH2n+2', 'CnH2n', 'CnH2n-2', 'CnHn'], answer: 0, difficulty: 'easy' },
+      { type: 'mcq', prompt: 'Which functional group defines an alcohol?', options: ['-OH', '-CHO', '-COOH', '-NH2'], answer: 0, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are hydrocarbons?', options: ['Methane', 'Ethene', 'Ethanol', 'Benzene'], answer: [0, 1, 3], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'How many carbon atoms are in butane?', answer: 4, unit: 'atoms', difficulty: 'easy' },
+      { type: 'mcq', prompt: 'What is the IUPAC name of CH3-CH2-OH?', options: ['Ethanol', 'Methanol', 'Ethanal', 'Ethanoic acid'], answer: 0, difficulty: 'medium' }
+    ]);
+    addAttempts('q-organic', [[3, 10, 9, 12]], 5);
+
+    /* ---- Biology ---- */
+    addQuiz('q-cell', 'f-bio', 'Cell Structure', 'Organelles, membranes and the difference between plant and animal cells.', '2026-08-20T16:45:00Z', [
+      { type: 'mcq', prompt: 'Which organelle produces ATP?', options: ['Mitochondrion', 'Ribosome', 'Golgi apparatus', 'Lysosome'], answer: 0, difficulty: 'easy' },
+      { type: 'mcq', prompt: 'Which structure controls what enters and leaves the cell?', options: ['Cell membrane', 'Nucleus', 'Cytoplasm', 'Vacuole'], answer: 0, difficulty: 'easy' },
+      { type: 'msq', prompt: 'Which are found in plant cells but not animal cells?', options: ['Chloroplast', 'Cell wall', 'Large central vacuole', 'Mitochondrion'], answer: [0, 1, 2], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'How many chromosomes does a normal human somatic cell have?', answer: 46, unit: 'chromosomes', difficulty: 'medium' },
+      { type: 'mcq', prompt: 'Where is DNA mainly stored in a eukaryotic cell?', options: ['Nucleus', 'Ribosome', 'Cell membrane', 'Cytoplasm'], answer: 0, difficulty: 'easy' }
+    ]);
+    addAttempts('q-cell', [[4, 9, 10, 4]], 5);
+
+    /* ---- History ---- */
+    addQuiz('q-history', 'f-history', 'Modern India: 1857–1947', 'Key movements and turning points in the freedom struggle.', '2026-08-23T07:40:00Z', [
+      { type: 'mcq', prompt: 'In which year did the Indian Rebellion begin?', options: ['1857', '1885', '1919', '1942'], answer: 0, difficulty: 'easy' },
+      { type: 'mcq', prompt: 'Who founded the Indian National Congress in 1885?', options: ['A. O. Hume', 'Bal Gangadhar Tilak', 'Mahatma Gandhi', 'Jawaharlal Nehru'], answer: 0, difficulty: 'medium' },
+      { type: 'msq', prompt: 'Which movements were led by Mahatma Gandhi?', options: ['Non-Cooperation', 'Salt March', 'Quit India', 'Partition of Bengal'], answer: [0, 1, 2], difficulty: 'medium' },
+      { type: 'numerical', prompt: 'In which year did India gain independence?', answer: 1947, difficulty: 'easy' },
+      { type: 'mcq', prompt: 'What was the year of the Jallianwala Bagh massacre?', options: ['1919', '1920', '1930', '1942'], answer: 0, difficulty: 'medium' }
+    ]);
+    addAttempts('q-history', [[2, 16, 8, 20], [4, 5, 6, 11]], 5);
+
+    /* ---- Aptitude ---- */
+    addQuiz('q-percent', 'f-aptitude', 'Percentages', 'Discounts, percentage change and reverse percentage problems.', '2026-09-03T10:00:00Z', [
+      { type: 'mcq', prompt: 'What is 15% of 200?', options: ['30', '15', '20', '25'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'A price rises from 80 to 100. What is the percentage increase?', answer: 25, unit: '%', difficulty: 'easy' },
+      { type: 'mcq', prompt: 'A shirt costs 1200 after a 20% discount. What was the original price?', options: ['1500', '1400', '1440', '1600'], answer: 0, difficulty: 'medium' },
+      { type: 'numerical', prompt: '12.5% as a fraction in lowest terms: enter the denominator.', answer: 8, difficulty: 'hard' },
+      { type: 'msq', prompt: 'Which are equivalent to 25%?', options: ['1/4', '0.25', '25/100', '2.5'], answer: [0, 1, 2], difficulty: 'easy' },
+      { type: 'numerical', prompt: 'If 40% of a number is 80, what is the number?', answer: 200, difficulty: 'medium' }
+    ]);
+    addAttempts('q-percent', [[4, 11, 10, 5], [5, 7, 8, 14], [6, 1, 6, 33]], 6);
+
+    addQuiz('q-timework', 'f-aptitude', 'Time & Work', 'Rates, combined work and worker-day problems.', '2026-09-05T15:20:00Z', [
+      { type: 'mcq', prompt: 'A can finish a job in 10 days. What fraction does he do in 1 day?', options: ['1/10', '1/5', '10', '5'], answer: 0, difficulty: 'easy' },
+      { type: 'numerical', prompt: 'A and B finish a job in 6 days. A alone takes 10 days. How many days does B alone take?', answer: 15, unit: 'days', difficulty: 'hard' },
+      { type: 'mcq', prompt: 'If 5 workers build a wall in 8 days, how many worker-days is the job?', options: ['40', '13', '30', '45'], answer: 0, difficulty: 'medium' },
+      { type: 'numerical', prompt: 'Two pipes fill a tank in 4 and 6 hours. Together, how many hours? Enter a decimal.', answer: 2.4, unit: 'hours', difficulty: 'hard' },
+      { type: 'mcq', prompt: 'Efficiency is inversely proportional to...', options: ['Time taken', 'Work done', 'Wages', 'Distance'], answer: 0, difficulty: 'easy' }
+    ]);
+    addAttempts('q-timework', [[3, 8, 9, 2]], 5);
+
+    /* ---- The real 35-question IPv4 quiz from docs/quiz.json ---- */
+    var ipv4Max = 35;
+    try {
+      var parsedSample = parseJsonLoose(SAMPLE_TEXT);
+      var canonical = canonicalizeQuiz(parsedSample.value);
+      if (!canonical.errors.length && canonical.quiz.questions.length) {
+        quizzes.push({
+          id: 'q-ipv4', folder_id: 'f-net',
+          title: canonical.quiz.title,
+          subtitle: canonical.quiz.subtitle,
+          source_key: canonical.quiz.source_key,
+          created_at: '2026-08-15T10:15:00Z'
+        });
+        canonical.quiz.questions.forEach(function (q, i) {
+          var qid = 'cn-q' + (i + 1);
+          var full = Object.assign({}, q, { id: qid, quiz_id: 'q-ipv4' });
+          questions.push({
+            id: qid, quiz_id: 'q-ipv4', prompt: full.prompt, type: full.type, marks: full.marks,
+            position: i, difficulty: full.difficulty, explanation: full.explanation, unit: full.unit,
+            numerical_answer: full.numerical_answer, tolerance: full.tolerance
+          });
+          full.options.forEach(function (o, j) {
+            options.push({
+              id: qid + '-o' + j, question_id: qid, text: o.text,
+              is_correct: o.is_correct ? 1 : 0, position: j
+            });
+          });
+        });
+        ipv4Max = canonical.quiz.questions.reduce(function (s, q) { return s + (q.marks || 1); }, 0);
+      }
+    } catch (e) {
+      /* A fallback keeps the mock usable if the sample cannot be parsed. */
+      quizzes.push({
+        id: 'q-ipv4', folder_id: 'f-net',
+        title: 'Classful IPv4 Addressing (sample unavailable)',
+        subtitle: 'The embedded sample could not be parsed.', source_key: null,
+        created_at: '2026-08-15T10:15:00Z'
+      });
+      ipv4Max = 1;
+    }
+    addAttempts('q-ipv4', [
+      [22, 21, 18, 42], [25, 18, 15, 10], [28, 14, 11, 5], [30, 10, 9, 48], [24, 7, 16, 22],
+      [31, 5, 8, 15], [27, 3, 12, 30], [33, 2, 7, 55], [29, 1, 10, 12], [26, 0, 14, 3]
+    ], ipv4Max);
+
+    return {
+      version: 1,
+      folders: folders,
+      quizzes: quizzes,
+      questions: questions,
+      question_options: options,
+      attempts: attempts
+    };
+  }
+
+  var SEED = buildSeed();
+  var db = loadDb();
+  var netlog = [];
+
+  function loadDb() {
+    try {
+      var stored = JSON.parse(localStorage.getItem(DB_KEY) || 'null');
+      if (stored && stored.version === 1 && Array.isArray(stored.folders) && Array.isArray(stored.quizzes)) {
+        return stored;
+      }
+    } catch (e) {}
+    return structuredClone(SEED);
+  }
+  function saveDb() {
+    try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) {}
+  }
+  function resetDb() {
+    db = structuredClone(SEED);
+    saveDb();
+  }
+  function commit() {
+    saveDb();
+    dataVersion++;
+  }
+  var dataVersion = 0;
+
+  /* ============================================================
+     4. Fake HTTP layer
+     ============================================================ */
+  window.__mock = { latencyMs: 350, errorRate: 0, offline: false };
+
+  function jsonResponse(body, status) {
+    return new Response(JSON.stringify(body), {
+      status: status || 200,
+      headers: { 'content-type': 'application/json' }
+    });
+  }
+
+  function folderPath(id) {
+    var path = [];
+    var guard = 0;
+    var current = db.folders.find(function (f) { return f.id === id; });
+    while (current && guard++ < 50) {
+      path.unshift({ id: current.id, name: current.name });
+      current = current.parent_folder_id ? db.folders.find(function (f) { return f.id === current.parent_folder_id; }) : null;
+    }
+    return path;
+  }
+
+  function folderIdsUnder(id) {
+    var ids = [id];
+    for (var i = 0; i < ids.length; i++) {
+      var parent = ids[i];
+      db.folders.forEach(function (f) {
+        if (f.parent_folder_id === parent && ids.indexOf(f.id) === -1) ids.push(f.id);
+      });
+    }
+    return ids;
+  }
+
+  function quizzesInFolders(folderIds) {
+    return db.quizzes.filter(function (q) { return folderIds.indexOf(q.folder_id) !== -1; });
+  }
+
+  function attemptsForQuiz(id) {
+    return db.attempts.filter(function (a) { return a.quiz_id === id; }).sort(function (a, b) {
+      return new Date(b.started_at) - new Date(a.started_at);
+    });
+  }
+
+  function quizSummary(q) {
+    var qs = db.questions.filter(function (x) { return x.quiz_id === q.id; });
+    var attempts = attemptsForQuiz(q.id);
+    var last = attempts[0] || null;
+    return {
+      id: q.id, folder_id: q.folder_id, title: q.title, subtitle: q.subtitle,
+      source_key: q.source_key, created_at: q.created_at,
+      question_count: qs.length,
+      total_marks: qs.reduce(function (s, x) { return s + (x.marks || 1); }, 0),
+      attempt_count: attempts.length,
+      last_attempt: last ? { id: last.id, score: last.score, max_score: last.max_score, started_at: last.started_at } : null
+    };
+  }
+
+  function folderSummary(f) {
+    var childFolders = db.folders.filter(function (x) { return x.parent_folder_id === f.id; });
+    var childQuizzes = db.quizzes.filter(function (x) { return x.folder_id === f.id; });
+    return {
+      id: f.id, name: f.name, parent_folder_id: f.parent_folder_id, created_at: f.created_at,
+      folder_count: childFolders.length, quiz_count: childQuizzes.length
+    };
+  }
+
+  function attemptPayload(a) {
+    return {
+      id: a.id, quiz_id: a.quiz_id, started_at: a.started_at, ended_at: a.ended_at,
+      duration_ms: a.duration_ms, score: a.score, max_score: a.max_score,
+      answers_json: a.answers_json
+    };
+  }
+
+  function scoreAttempt(quizId, answers) {
+    var qs = db.questions.filter(function (q) { return q.quiz_id === quizId; });
+    var score = 0;
+    var maxScore = 0;
+    qs.forEach(function (q) {
+      maxScore += q.marks || 1;
+      var given = answers ? answers[q.id] : null;
+      var correct = false;
+      if (q.type === 'numerical') {
+        var num = Number(given);
+        if (given !== null && given !== '' && isFinite(num) && q.numerical_answer != null) {
+          correct = Math.abs(num - q.numerical_answer) <= (q.tolerance == null ? 0 : q.tolerance) + 1e-9;
+        }
+      } else {
+        var opts = db.question_options.filter(function (o) { return o.question_id === q.id; });
+        var correctIds = opts.filter(function (o) { return o.is_correct === 1; }).map(function (o) { return o.id; });
+        if (q.type === 'mcq') {
+          correct = typeof given === 'string' && correctIds.length === 1 && correctIds[0] === given;
+        } else if (q.type === 'msq') {
+          var selected = Array.isArray(given) ? given : [];
+          var selectedUnique = Array.from(new Set(selected));
+          correct = selectedUnique.length === correctIds.length &&
+            selectedUnique.every(function (id) { return correctIds.indexOf(id) !== -1; });
+        }
+      }
+      if (correct) score += q.marks || 1;
+    });
+    return { score: score, max_score: maxScore };
+  }
+
+  var routes = [
+    {
+      method: 'GET',
+      path: /^\/api\/folders\/([^/]+)\/contents$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var folder = id === 'root' ? null : db.folders.find(function (f) { return f.id === id; });
+        if (id !== 'root' && !folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        var parentId = folder ? folder.id : null;
+        var folders = db.folders.filter(function (f) { return f.parent_folder_id === parentId; })
+          .sort(function (a, b) { return a.name.localeCompare(b.name); })
+          .map(folderSummary);
+        var quizzes = db.quizzes.filter(function (q) { return q.folder_id === parentId; })
+          .sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); })
+          .map(quizSummary);
+        return {
+          status: 200,
+          body: {
+            data: {
+              folder: folder ? { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id, created_at: folder.created_at } : null,
+              path: folder ? folderPath(folder.id) : [],
+              folders: folders,
+              quizzes: quizzes,
+              stats: { folders: db.folders.length, quizzes: db.quizzes.length, attempts: db.attempts.length }
+            }
+          }
+        };
+      }
+    },
+    {
+      method: 'GET',
+      path: /^\/api\/folders\/([^/]+)\/delete-preview$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var folder = db.folders.find(function (f) { return f.id === id; });
+        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        var ids = folderIdsUnder(id);
+        var childIds = ids.filter(function (x) { return x !== id; });
+        var quizzes = quizzesInFolders(ids);
+        var attempts = db.attempts.filter(function (a) { return quizzes.some(function (q) { return q.id === a.quiz_id; }); });
+        return {
+          status: 200,
+          body: {
+            data: {
+              folder: { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id },
+              folders: childIds.length,
+              quizzes: quizzes.length,
+              attempts: attempts.length,
+              questions: db.questions.filter(function (q) { return quizzes.some(function (x) { return x.id === q.quiz_id; }); }).length
+            }
+          }
+        };
+      }
+    },
+    {
+      method: 'POST',
+      path: /^\/api\/folders$/,
+      handler: function (ctx) {
+        var body = ctx.body || {};
+        var name = typeof body.name === 'string' ? body.name.trim() : '';
+        var parentId = body.parent_folder_id || null;
+        if (!name) return { status: 422, body: { error: { code: 'name_required', message: 'Give the folder a name.' } } };
+        if (name.length > 60) return { status: 422, body: { error: { code: 'name_too_long', message: 'Folder names can be up to 60 characters.' } } };
+        if (parentId) {
+          var parent = db.folders.find(function (f) { return f.id === parentId; });
+          if (!parent) return { status: 404, body: { error: { code: 'folder_not_found', message: 'The parent folder no longer exists.' } } };
+        }
+        var duplicate = db.folders.some(function (f) {
+          return (f.parent_folder_id || null) === parentId && f.name.toLowerCase() === name.toLowerCase();
+        });
+        if (duplicate) return { status: 409, body: { error: { code: 'name_taken', message: 'A folder with this name already exists here.' } } };
+        var folder = {
+          id: uuid(), name: name, parent_folder_id: parentId,
+          created_at: new Date().toISOString()
+        };
+        db.folders.push(folder);
+        commit();
+        return { status: 201, body: { data: folderSummary(folder) } };
+      }
+    },
+    {
+      method: 'PATCH',
+      path: /^\/api\/folders\/([^/]+)$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var folder = db.folders.find(function (f) { return f.id === id; });
+        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        var body = ctx.body || {};
+        var name = typeof body.name === 'string' ? body.name.trim() : '';
+        if (!name) return { status: 422, body: { error: { code: 'name_required', message: 'Give the folder a name.' } } };
+        if (name.length > 60) return { status: 422, body: { error: { code: 'name_too_long', message: 'Folder names can be up to 60 characters.' } } };
+        var duplicate = db.folders.some(function (f) {
+          return f.id !== id && (f.parent_folder_id || null) === (folder.parent_folder_id || null) && f.name.toLowerCase() === name.toLowerCase();
+        });
+        if (duplicate) return { status: 409, body: { error: { code: 'name_taken', message: 'A folder with this name already exists here.' } } };
+        folder.name = name;
+        commit();
+        return { status: 200, body: { data: folderSummary(folder) } };
+      }
+    },
+    {
+      method: 'DELETE',
+      path: /^\/api\/folders\/([^/]+)$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var folder = db.folders.find(function (f) { return f.id === id; });
+        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        var ids = folderIdsUnder(id);
+        var quizzes = quizzesInFolders(ids);
+        var quizIds = quizzes.map(function (q) { return q.id; });
+        var questionIds = db.questions.filter(function (q) { return quizIds.indexOf(q.quiz_id) !== -1; }).map(function (q) { return q.id; });
+        db.attempts = db.attempts.filter(function (a) { return quizIds.indexOf(a.quiz_id) === -1; });
+        db.question_options = db.question_options.filter(function (o) { return questionIds.indexOf(o.question_id) === -1; });
+        db.questions = db.questions.filter(function (q) { return quizIds.indexOf(q.quiz_id) === -1; });
+        db.quizzes = db.quizzes.filter(function (q) { return quizIds.indexOf(q.id) === -1; });
+        db.folders = db.folders.filter(function (f) { return ids.indexOf(f.id) === -1; });
+        commit();
+        return { status: 204, body: null };
+      }
+    },
+    {
+      method: 'GET',
+      path: /^\/api\/quizzes\/([^/]+)$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var quiz = db.quizzes.find(function (q) { return q.id === id; });
+        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        var folder = db.folders.find(function (f) { return f.id === quiz.folder_id; });
+        var questions = db.questions.filter(function (q) { return q.quiz_id === id; })
+          .sort(function (a, b) { return a.position - b.position; })
+          .map(function (q) {
+            var opts = db.question_options.filter(function (o) { return o.question_id === q.id; })
+              .sort(function (a, b) { return a.position - b.position; });
+            return Object.assign({}, q, { options: opts });
+          });
+        var attempts = attemptsForQuiz(id).map(attemptPayload);
+        return {
+          status: 200,
+          body: {
+            data: {
+              quiz: quiz,
+              folder: folder ? { id: folder.id, name: folder.name } : null,
+              questions: questions,
+              attempts: attempts
+            }
+          }
+        };
+      }
+    },
+    {
+      method: 'DELETE',
+      path: /^\/api\/quizzes\/([^/]+)$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var quiz = db.quizzes.find(function (q) { return q.id === id; });
+        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        var questionIds = db.questions.filter(function (q) { return q.quiz_id === id; }).map(function (q) { return q.id; });
+        db.attempts = db.attempts.filter(function (a) { return a.quiz_id !== id; });
+        db.question_options = db.question_options.filter(function (o) { return questionIds.indexOf(o.question_id) === -1; });
+        db.questions = db.questions.filter(function (q) { return q.quiz_id !== id; });
+        db.quizzes = db.quizzes.filter(function (q) { return q.id !== id; });
+        commit();
+        return { status: 204, body: null };
+      }
+    },
+    {
+      method: 'POST',
+      path: /^\/api\/quizzes\/import$/,
+      handler: function (ctx) {
+        var body = ctx.body || {};
+        var folderId = body.folder_id;
+        var folder = db.folders.find(function (f) { return f.id === folderId; });
+        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'Choose a folder before importing.' } } };
+        var incoming = Array.isArray(body.quizzes) ? body.quizzes : [];
+        if (!incoming.length) return { status: 422, body: { error: { code: 'no_quizzes', message: 'There are no valid quizzes to import.' } } };
+        var imported = [];
+        var skipped = [];
+        incoming.forEach(function (raw) {
+          if (!raw || !raw.title || !Array.isArray(raw.questions) || !raw.questions.length) {
+            skipped.push({ title: (raw && raw.title) || 'Untitled', reason: 'Invalid quiz payload.' });
+            return;
+          }
+          var quiz = {
+            id: uuid(), folder_id: folderId, title: String(raw.title).trim(),
+            subtitle: raw.subtitle || null, source_key: raw.source_key || null,
+            created_at: new Date().toISOString()
+          };
+          db.quizzes.push(quiz);
+          raw.questions.forEach(function (q, index) {
+            var qid = uuid();
+            db.questions.push({
+              id: qid, quiz_id: quiz.id, prompt: q.prompt, type: q.type, marks: 1,
+              position: index, difficulty: q.difficulty || null, explanation: q.explanation || null,
+              unit: q.unit || null, numerical_answer: q.numerical_answer == null ? null : q.numerical_answer,
+              tolerance: q.tolerance == null ? null : q.tolerance
+            });
+            (q.options || []).forEach(function (o, j) {
+              db.question_options.push({
+                id: uuid(), question_id: qid, text: o.text,
+                is_correct: o.is_correct ? 1 : 0, position: j
+              });
+            });
+          });
+          imported.push({ id: quiz.id, title: quiz.title });
+        });
+        commit();
+        return { status: 201, body: { data: { imported: imported, skipped: skipped } } };
+      }
+    },
+    {
+      method: 'POST',
+      path: /^\/api\/attempts$/,
+      handler: function (ctx) {
+        var body = ctx.body || {};
+        var quiz = db.quizzes.find(function (q) { return q.id === body.quiz_id; });
+        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        var started = new Date(body.started_at);
+        var ended = new Date(body.ended_at);
+        if (isNaN(started.getTime()) || isNaN(ended.getTime())) {
+          return { status: 422, body: { error: { code: 'invalid_time', message: 'The attempt timestamps are invalid.' } } };
+        }
+        var duration = Math.max(0, ended.getTime() - started.getTime());
+        var result = scoreAttempt(quiz.id, body.answers || {});
+        var attempt = {
+          id: uuid(), quiz_id: quiz.id, started_at: started.toISOString(), ended_at: ended.toISOString(),
+          duration_ms: duration, score: result.score, max_score: result.max_score,
+          answers_json: JSON.stringify(body.answers || {})
+        };
+        db.attempts.push(attempt);
+        commit();
+        return { status: 201, body: { data: { attempt: attemptPayload(attempt), quiz: quiz } } };
+      }
+    },
+    {
+      method: 'GET',
+      path: /^\/api\/attempts\/([^/]+)$/,
+      handler: function (ctx) {
+        var id = decodeURIComponent(ctx.match[1]);
+        var attempt = db.attempts.find(function (a) { return a.id === id; });
+        if (!attempt) return { status: 404, body: { error: { code: 'attempt_not_found', message: 'This attempt no longer exists.' } } };
+        var quiz = db.quizzes.find(function (q) { return q.id === attempt.quiz_id; });
+        return { status: 200, body: { data: { attempt: attemptPayload(attempt), quiz: quiz || null } } };
+      }
+    }
+  ];
+
+  window.fetch = async function (input, init) {
+    init = init || {};
+    var raw = typeof input === 'string' ? input : input.url;
+    var url = new URL(raw, location.href);
+    var requestPath = url.pathname.replace(/^\/[A-Za-z]:/, '') + url.search;
+    var method = (init.method || 'GET').toUpperCase();
+    var body = null;
+    try { body = init.body ? JSON.parse(init.body) : null; } catch (e) { body = null; }
+    var started = performance.now();
+    await sleep(window.__mock.latencyMs);
+
+    var status = 200;
+    var payload = null;
+    if (window.__mock.offline) {
+      status = 503;
+      payload = { error: { code: 'offline', message: 'You are offline. Reconnect to continue.' } };
+    } else if (window.__mock.errorRate > 0 && Math.random() * 100 < window.__mock.errorRate) {
+      status = 500;
+      payload = { error: { code: 'server_error', message: 'Something went wrong. Please try again.' } };
+    } else {
+      var route = null;
+      var match = null;
+      for (var i = 0; i < routes.length; i++) {
+        if (routes[i].method === method) {
+          var m = requestPath.match(routes[i].path);
+          if (m) { route = routes[i]; match = m; break; }
+        }
+      }
+      if (!route) {
+        status = 404;
+        payload = { error: { code: 'not_found', message: 'Not found.' } };
+      } else {
+        try {
+          var result = route.handler({ url: url, query: url.searchParams, body: body, match: match });
+          status = result.status || 200;
+          payload = result.body;
+        } catch (e) {
+          status = 500;
+          payload = { error: { code: 'server_error', message: e && e.message ? e.message : 'Something went wrong.' } };
+        }
+      }
+    }
+
+    var elapsed = Math.round(performance.now() - started);
+    netlog.unshift({ method: method, path: requestPath, status: status, ms: elapsed });
+    if (netlog.length > 50) netlog.pop();
+    renderNetlog();
+
+    if (status === 204) return new Response(null, { status: 204 });
+    return jsonResponse(payload, status);
+  };
+
+  function ApiError(code, message, status) {
+    this.code = code;
+    this.message = message;
+    this.status = status;
+    this.name = 'ApiError';
+  }
+  ApiError.prototype = Object.create(Error.prototype);
+
+  async function apiRequest(path, options) {
+    var res = await fetch(path, options || {});
+    if (res.status === 204) return null;
+    var body;
+    try { body = await res.json(); } catch (e) { body = null; }
+    if (!res.ok) {
+      var err = body && body.error ? body.error : { code: 'unknown', message: 'Something went wrong.' };
+      throw new ApiError(err.code, err.message, res.status);
+    }
+    return body ? body.data : null;
+  }
+
+  var api = {
+    folderContents: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id) + '/contents'); },
+    folderDeletePreview: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id) + '/delete-preview'); },
+    createFolder: function (parentId, name) {
+      return apiRequest('/api/folders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ parent_folder_id: parentId, name: name }) });
+    },
+    renameFolder: function (id, name) {
+      return apiRequest('/api/folders/' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name }) });
+    },
+    deleteFolder: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id), { method: 'DELETE' }); },
+    quiz: function (id) { return apiRequest('/api/quizzes/' + encodeURIComponent(id)); },
+    deleteQuiz: function (id) { return apiRequest('/api/quizzes/' + encodeURIComponent(id), { method: 'DELETE' }); },
+    importQuizzes: function (folderId, quizzes) {
+      return apiRequest('/api/quizzes/import', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ folder_id: folderId, quizzes: quizzes }) });
+    },
+    saveAttempt: function (payload) {
+      return apiRequest('/api/attempts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+    },
+    attempt: function (id) { return apiRequest('/api/attempts/' + encodeURIComponent(id)); }
+  };
+
+  /* ============================================================
+     5. App state + UI helpers
+     ============================================================ */
+  var renderToken = 0;
+  var pendingToast = null;
+  var importState = null;
+  var attempt = null;
+  var attemptPreload = null;
+  var currentHash = '#/';
+  var screenData = { folder: null, quiz: null };
+
+  function isOffline() { return !!window.__mock.offline; }
+  function guardOffline() {
+    if (isOffline()) {
+      showToast('You are offline. Reconnect from the dev toolbar.');
+      return true;
+    }
+    return false;
+  }
+
+  function offlineBanner() {
+    if (!isOffline()) return '';
+    return '<div class="offline-banner">' + icon('wifiOff', 15) + '<span>Offline — writes are paused.</span><button class="text-btn" data-action="retry" type="button">Retry</button></div>';
+  }
+
+  function shell(opts) {
+    var o = opts || {};
+    var back = o.back;
+    var actions = o.actions || '';
+    return '<div class="screen">' +
+      '<header class="appbar">' +
+        (back ? '<button class="icon-btn" data-action="nav" data-hash="' + esc(back) + '" aria-label="Back">' + icon('arrowLeft', 20) + '</button>' : '<span class="appbar-slot"></span>') +
+        '<div class="appbar-title">' + esc(o.title || '') + '</div>' +
+        '<div class="appbar-actions">' + actions + '</div>' +
+      '</header>' +
+      (o.banner === false ? '' : offlineBanner()) +
+      '<main class="content' + (o.flush ? ' flush' : '') + '">' + (o.content || '') + '</main>' +
+      (o.footer || '') +
+      (o.fab || '') +
+    '</div>';
+  }
+
+  function setScreen(html) {
+    var screen = document.getElementById('screen');
+    screen.innerHTML = html;
+  }
+
+  function skeletonScreen(title, back, rows) {
+    var body = '';
+    for (var i = 0; i < (rows || 7); i++) {
+      body += '<div class="skeleton-row"><div class="s-icon skeleton"></div><div class="s-lines"><div class="s-line mid skeleton"></div><div class="s-line short skeleton"></div></div></div>';
+    }
+    setScreen(shell({ title: title || '', back: back, content: body, banner: false }));
+  }
+
+  function emptyState(iconName, title, text, actionLabel, actionHash, action, actionAttrs) {
+    var actionHtml = '';
+    if (actionLabel) {
+      var attrs = actionHash
+        ? 'data-action="nav" data-hash="' + esc(actionHash) + '"'
+        : 'data-action="' + esc(action) + '"' + (actionAttrs ? ' ' + actionAttrs : '');
+      actionHtml = '<button class="btn primary" ' + attrs + ' type="button">' + esc(actionLabel) + '</button>';
+    }
+    return '<div class="empty">' +
+      '<div class="empty-icon">' + icon(iconName, 26) + '</div>' +
+      '<h2>' + esc(title) + '</h2>' +
+      '<p>' + esc(text) + '</p>' +
+      actionHtml +
+    '</div>';
+  }
+
+  function errorState(message, retryAction) {
+    return '<div class="error-box">' +
+      '<div class="error-icon">' + icon('alert', 26) + '</div>' +
+      '<h2>Couldn\'t load this screen</h2>' +
+      '<p>' + esc(message || 'Something went wrong. Please try again.') + '</p>' +
+      '<button class="btn secondary" data-action="' + (retryAction || 'retry') + '" type="button">' + icon('refresh', 16) + ' Retry</button>' +
+    '</div>';
+  }
+
+  function showToast(message, iconName) {
+    var root = document.getElementById('toast-root');
+    root.innerHTML = '<div class="toast">' + (iconName ? icon(iconName, 14) : '') + esc(message) + '</div>';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { root.innerHTML = ''; }, 2800);
+  }
+
+  function openOverlay(html, focusSelector) {
+    document.getElementById('app').classList.add('sheet-open');
+    var root = document.getElementById('overlay-root');
+    root.innerHTML = '<div class="overlay"><div class="backdrop" data-action="close-sheet"></div>' + html + '</div>';
+    if (focusSelector) {
+      setTimeout(function () {
+        var el = $(focusSelector);
+        if (el) { el.focus(); if (el.select) el.select(); }
+      }, 80);
+    }
+  }
+  function closeOverlay() {
+    document.getElementById('app').classList.remove('sheet-open');
+    document.getElementById('overlay-root').innerHTML = '';
+  }
+  function sheet(content) {
+    return '<div class="sheet" role="dialog" aria-modal="true"><div class="grabber"></div>' + content + '</div>';
+  }
+
+  /* ============================================================
+     6. Routes / screens
+     ============================================================ */
+  function matchRoute(path) {
+    var defs = [
+      { re: /^\/$/, render: function (m, q, t) { return renderFolder({ id: 'root' }, q, t); } },
+      { re: /^\/folders\/([^/]+)$/, render: function (m, q, t) { return renderFolder({ id: decodeURIComponent(m[1]) }, q, t); } },
+      { re: /^\/quizzes\/([^/]+)$/, render: function (m, q, t) { return renderQuiz({ id: decodeURIComponent(m[1]) }, q, t); } },
+      { re: /^\/quizzes\/([^/]+)\/attempt$/, render: function (m, q, t) { return renderAttempt({ id: decodeURIComponent(m[1]) }, q, t); }, attempt: true },
+      { re: /^\/quizzes\/([^/]+)\/result\/([^/]+)$/, render: function (m, q, t) { return renderResult({ quizId: decodeURIComponent(m[1]), id: decodeURIComponent(m[2]) }, q, t); } },
+      { re: /^\/attempts\/([^/]+)$/, render: function (m, q, t) { return renderResult({ id: decodeURIComponent(m[1]) }, q, t); } },
+      { re: /^\/import$/, render: function (m, q, t) { return renderImport({}, q, t); } }
+    ];
+    for (var i = 0; i < defs.length; i++) {
+      var m = path.match(defs[i].re);
+      if (m) return { def: defs[i], match: m };
+    }
+    return null;
+  }
+
+  async function renderRoute() {
+    var token = ++renderToken;
+    closeOverlay();
+    var raw = (location.hash || '#/').slice(1);
+    if (!raw) raw = '/';
+    var qIndex = raw.indexOf('?');
+    var path = qIndex === -1 ? raw : raw.slice(0, qIndex);
+    var query = new URLSearchParams(qIndex === -1 ? '' : raw.slice(qIndex + 1));
+    currentHash = '#' + path + (qIndex === -1 ? '' : raw.slice(qIndex));
+    syncDevScreen(path + (qIndex === -1 ? '' : raw.slice(qIndex)));
+    var found = matchRoute(path);
+
+    if (!found) {
+      renderNotFound();
+      flushToast();
+      return;
+    }
+
+    if (path !== '/import') importState = null;
+
+    await found.def.render(found.match, query, token);
+    if (token !== renderToken) return;
+    flushToast();
+  }
+
+  function flushToast() {
+    if (pendingToast) {
+      showToast(pendingToast.message, pendingToast.icon);
+      pendingToast = null;
+    }
+  }
+
+  function go(hash, toast, iconName) {
+    closeOverlay();
+    if (toast) pendingToast = { message: toast, icon: iconName || 'check' };
+    var target = hash.charAt(0) === '#' ? hash : '#' + hash;
+    if (location.hash === target) {
+      renderRoute();
+    } else {
+      location.hash = target;
+    }
+  }
+
+  function renderNotFound() {
+    setScreen(shell({
+      title: 'Not found',
+      back: '/',
+      content: emptyState('alert', 'This page doesn\'t exist', 'The link may be old, or the screen was moved. Your library is still where you left it.', 'Go to library', '/'),
+      fab: ''
+    }));
+  }
+
+  function rootHero(folders, stats) {
+    var quizCount = stats && typeof stats.quizzes === 'number' ? stats.quizzes : 0;
+    return '<section class="hero">' +
+      '<div class="eyebrow">Library</div>' +
+      '<h1 class="display">Your library</h1>' +
+      '<p class="hero-sub">Folders and quizzes, kept local and in order.</p>' +
+      '<div class="hero-meta"><span>' + plural(folders.length, 'folder') + '</span><span class="dot-sep"></span><span>' + plural(quizCount, 'quiz', 'quizzes') + '</span></div>' +
+    '</section>';
+  }
+
+  function breadcrumb(path) {
+    if (!path || !path.length) return '';
+    var out = '<nav class="crumbs" aria-label="Breadcrumb"><button class="crumb" data-action="nav" data-hash="/" type="button">All folders</button>';
+    path.forEach(function (f, i) {
+      out += '<span class="crumb-sep">' + icon('chevronRight', 12) + '</span>';
+      out += '<button class="crumb' + (i === path.length - 1 ? ' current' : '') + '" data-action="nav" data-hash="/folders/' + encodeURIComponent(f.id) + '" type="button">' + esc(f.name) + '</button>';
+    });
+    out += '</nav>';
+    return out;
+  }
+
+  function folderRow(f) {
+    var bits = [];
+    if (f.folder_count) bits.push(plural(f.folder_count, 'folder'));
+    if (f.quiz_count) bits.push(plural(f.quiz_count, 'quiz', 'quizzes'));
+    var meta = bits.length ? bits.join(' · ') : 'Empty';
+    return '<div class="row">' +
+      '<button class="row-hit" data-action="nav" data-hash="/folders/' + encodeURIComponent(f.id) + '" type="button">' +
+        '<span class="row-icon">' + icon('folder', 20) + '</span>' +
+        '<span class="row-main"><span class="row-title">' + esc(f.name) + '</span><span class="row-meta">' + meta + '</span></span>' +
+        '<span class="row-end">' + icon('chevronRight', 17) + '</span>' +
+      '</button>' +
+      '<button class="row-more" data-action="folder-actions" data-id="' + f.id + '" aria-label="Folder options" type="button">' + icon('more', 18) + '</button>' +
+    '</div>';
+  }
+
+  function quizRow(q) {
+    var meta = plural(q.question_count, 'question') + ' · ' + (q.attempt_count ? plural(q.attempt_count, 'attempt') : 'No attempts');
+    var last = q.last_attempt;
+    return '<div class="row">' +
+      '<button class="row-hit" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(q.id) + '" type="button">' +
+        '<span class="row-icon quiz">' + icon('file', 19) + '</span>' +
+        '<span class="row-main"><span class="row-title">' + esc(q.title) + '</span><span class="row-meta">' + meta + '</span></span>' +
+        '<span class="row-end">' + (last ? '<span class="score-badge ' + scoreClass(pct(last.score, last.max_score)) + '">' + last.score + '/' + last.max_score + '</span>' : '') + icon('chevronRight', 17) + '</span>' +
+      '</button>' +
+      '<button class="row-more" data-action="quiz-actions" data-id="' + q.id + '" aria-label="Quiz options" type="button">' + icon('more', 18) + '</button>' +
+    '</div>';
+  }
+
+  async function renderFolder(params, query, token) {
+    var id = params.id || 'root';
+    skeletonScreen(id === 'root' ? 'All folders' : 'Folder', id === 'root' ? null : '/', 7);
+    try {
+      var data = await api.folderContents(id);
+      if (token !== renderToken) return;
+      screenData.folder = data;
+      screenData.quiz = null;
+      var folder = data.folder;
+      var folders = data.folders || [];
+      var quizzes = data.quizzes || [];
+      var title = folder ? folder.name : 'All folders';
+      var content = '';
+
+      if (folder) {
+        content += breadcrumb(data.path) +
+          '<div class="folder-summary"><span>' + plural(folders.length, 'folder') + '</span><span class="dot-sep"></span><span>' + plural(quizzes.length, 'quiz', 'quizzes') + '</span></div>';
+      } else {
+        content += rootHero(folders, data.stats);
+      }
+
+      if (folders.length) {
+        content += '<section class="list-section"><div class="section-head"><span>Folders</span><span class="section-count">' + folders.length + '</span></div><div class="rows">' + folders.map(folderRow).join('') + '</div></section>';
+      }
+      if (quizzes.length) {
+        content += '<section class="list-section"><div class="section-head"><span>Quizzes</span><span class="section-count">' + quizzes.length + '</span></div><div class="rows">' + quizzes.map(quizRow).join('') + '</div></section>';
+      }
+      if (!folders.length && !quizzes.length) {
+        var empty = folder
+          ? emptyState('folder', 'This folder is empty', 'Create a sub-folder or import a quiz to get started.', 'New folder', null, 'new-folder', 'data-parent="' + folder.id + '"')
+          : emptyState('folderPlus', 'No folders yet', 'Folders keep related quizzes together. Create your first one to begin.', 'New folder', null, 'new-folder', 'data-parent=""');
+        content += empty;
+      }
+
+      var actions = '<button class="icon-btn" data-action="retry" aria-label="Refresh">' + icon('refresh', 19) + '</button>';
+      if (folder) actions += '<button class="icon-btn" data-action="folder-actions" data-id="' + folder.id + '" aria-label="Folder options">' + icon('more', 19) + '</button>';
+
+      setScreen(shell({
+        title: title,
+        back: folder ? (folder.parent_folder_id ? '/folders/' + encodeURIComponent(folder.parent_folder_id) : '/') : null,
+        actions: actions,
+        content: content,
+        fab: '<button class="fab" data-action="fab" data-folder="' + (folder ? folder.id : 'root') + '" aria-label="Add" type="button">' + icon('plus', 24) + '</button>'
+      }));
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({
+        title: id === 'root' ? 'All folders' : 'Folder',
+        back: id === 'root' ? null : '/',
+        content: errorState(e.message, 'retry'),
+        banner: true
+      }));
+    }
+  }
+
+  function typeCounts(questions) {
+    var c = { mcq: 0, msq: 0, numerical: 0 };
+    questions.forEach(function (q) { if (c[q.type] != null) c[q.type]++; });
+    return c;
+  }
+  function typeLabel(type) { return type === 'mcq' ? 'MCQ' : type === 'msq' ? 'MSQ' : 'Numerical'; }
+
+  function attemptRow(a, quiz) {
+    var p = pct(a.score, a.max_score);
+    return '<button class="attempt-row" data-action="nav" data-hash="/attempts/' + encodeURIComponent(a.id) + '" type="button">' +
+      '<span class="score-badge ' + scoreClass(p) + '">' + a.score + '/' + a.max_score + '</span>' +
+      '<span class="attempt-main"><span class="attempt-score">' + p + '%</span><span class="attempt-meta">' + formatDurationLong(a.duration_ms) + ' · ' + formatDate(a.started_at) + '</span></span>' +
+      '<span class="chev">' + icon('chevronRight', 16) + '</span>' +
+    '</button>';
+  }
+
+  async function renderQuiz(params, query, token) {
+    skeletonScreen('Quiz', '/', 6);
+    try {
+      var data = await api.quiz(params.id);
+      if (token !== renderToken) return;
+      screenData.quiz = data;
+      screenData.folder = null;
+      var quiz = data.quiz;
+      var folder = data.folder;
+      var questions = data.questions || [];
+      var attempts = data.attempts || [];
+      var counts = typeCounts(questions);
+      var totalMarks = questions.reduce(function (s, q) { return s + (q.marks || 1); }, 0);
+      var chips = '<span class="chip">' + plural(questions.length, 'question') + '</span><span class="chip">' + totalMarks + ' marks</span>';
+      if (counts.mcq) chips += '<span class="chip">' + counts.mcq + ' MCQ</span>';
+      if (counts.msq) chips += '<span class="chip">' + counts.msq + ' MSQ</span>';
+      if (counts.numerical) chips += '<span class="chip">' + counts.numerical + ' Numerical</span>';
+
+      var content = '<section class="detail-hero">' +
+        '<div class="eyebrow">' + esc(folder ? folder.name : 'Quiz') + '</div>' +
+        '<h1 class="display">' + esc(quiz.title) + '</h1>' +
+        (quiz.subtitle ? '<p class="detail-sub">' + esc(quiz.subtitle) + '</p>' : '') +
+        '<div class="chips">' + chips + '</div>' +
+      '</section>' +
+      '<button class="btn primary wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '/attempt" type="button">' + icon('play', 18) + ' Start attempt</button>' +
+      '<p class="center-hint">Unlimited attempts · the timer starts on Start</p>' +
+      '<section class="list-section"><div class="section-head"><span>Attempts</span><span class="section-count">' + attempts.length + '</span></div>' +
+        (attempts.length
+          ? '<div class="rows">' + attempts.map(function (a) { return attemptRow(a, quiz); }).join('') + '</div>'
+          : '<div class="card" style="margin-top:6px;text-align:center;padding:22px 16px;"><div class="muted" style="font-size:12px;">Your first score will appear here after you press End.</div></div>') +
+      '</section>';
+
+      setScreen(shell({
+        title: 'Quiz',
+        back: '/folders/' + encodeURIComponent(quiz.folder_id),
+        actions: '<button class="icon-btn" data-action="quiz-actions" data-id="' + quiz.id + '" aria-label="Quiz options">' + icon('more', 19) + '</button>',
+        content: content
+      }));
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({ title: 'Quiz', back: '/', content: errorState(e.message, 'retry') }));
+    }
+  }
+
+  function questionCard(q, index) {
+    var selected = attempt.answers[q.id];
+    var options = '';
+    if (q.type === 'numerical') {
+      var val = typeof selected === 'string' ? selected : '';
+      options = '<div class="numeric-wrap"><input class="numeric-input" data-numeric data-qid="' + q.id + '" inputmode="decimal" autocomplete="off" value="' + esc(val) + '" placeholder="Enter a number"' + (q.unit ? ' aria-label="Answer in ' + esc(q.unit) + '"' : '') + '>' + (q.unit ? '<span class="unit">' + esc(q.unit) + '</span>' : '') + '</div>';
+    } else {
+      options = '<div class="options ' + q.type + '">' + q.options.map(function (o) {
+        var isSelected = q.type === 'mcq'
+          ? selected === o.id
+          : (Array.isArray(selected) && selected.indexOf(o.id) !== -1);
+        return '<button class="option ' + q.type + (isSelected ? ' selected' : '') + '" data-action="' + (q.type === 'mcq' ? 'choose-mcq' : 'toggle-msq') + '" data-qid="' + q.id + '" data-oid="' + o.id + '" aria-pressed="' + isSelected + '" type="button">' +
+          '<span class="control">' + (q.type === 'mcq' ? '<span class="dot"></span>' : icon('check', 12)) + '</span>' +
+          '<span class="option-text">' + rich(o.text) + '</span>' +
+        '</button>';
+      }).join('') + '</div>';
+    }
+    return '<article class="question-card" data-question="' + q.id + '">' +
+      '<div class="question-head"><span class="question-num">' + pad(index + 1) + '</span><span class="type-chip ' + q.type + '">' + typeLabel(q.type) + '</span><span class="marks">' + (q.marks || 1) + ' mark</span></div>' +
+      '<h2 class="question-prompt">' + rich(q.prompt) + '</h2>' +
+      options +
+    '</article>';
+  }
+
+  function attemptAnsweredCount() {
+    if (!attempt) return 0;
+    return attempt.questions.filter(function (q) {
+      var a = attempt.answers[q.id];
+      if (q.type === 'numerical') return String(a == null ? '' : a).trim() !== '';
+      if (q.type === 'msq') return Array.isArray(a) && a.length > 0;
+      return !!a;
+    }).length;
+  }
+
+  function updateAttemptChrome() {
+    if (!attempt) return;
+    var answered = attemptAnsweredCount();
+    var total = attempt.questions.length;
+    var progress = total ? Math.round((answered / total) * 100) : 0;
+    var pc = document.getElementById('progress-count');
+    if (pc) pc.textContent = answered + ' / ' + total + ' answered';
+    var bar = document.getElementById('progress-bar');
+    if (bar) bar.style.width = progress + '%';
+    var fa = document.getElementById('footer-answered');
+    if (fa) fa.textContent = String(answered);
+    var timer = document.getElementById('attempt-timer');
+    if (timer) timer.textContent = formatClock(Date.now() - attempt.startedAt.getTime());
+  }
+
+  function startTimer() {
+    stopTimer();
+    attempt.timerId = setInterval(function () {
+      if (!attempt || !attempt.running) return;
+      var timer = document.getElementById('attempt-timer');
+      if (timer) timer.textContent = formatClock(Date.now() - attempt.startedAt.getTime());
+    }, 1000);
+    updateAttemptChrome();
+  }
+  function stopTimer() {
+    if (attempt && attempt.timerId) {
+      clearInterval(attempt.timerId);
+      attempt.timerId = null;
+    }
+  }
+
+  async function renderAttempt(params, query, token) {
+    if (attempt && attempt.quiz.id === params.id && attempt.running) {
+      renderRunning();
+      return;
+    }
+    skeletonScreen('Attempt', '/quizzes/' + params.id, 4);
+    try {
+      var data = await api.quiz(params.id);
+      if (token !== renderToken) return;
+      attemptPreload = data;
+      var quiz = data.quiz;
+      var questions = data.questions || [];
+      var totalMarks = questions.reduce(function (s, q) { return s + (q.marks || 1); }, 0);
+      var content = '<section class="attempt-intro">' +
+        '<div class="eyebrow">' + esc(data.folder ? data.folder.name : 'Quiz') + '</div>' +
+        '<h1 class="display">' + esc(quiz.title) + '</h1>' +
+        '<div class="chips"><span class="chip">' + plural(questions.length, 'question') + '</span><span class="chip">' + totalMarks + ' marks</span><span class="chip">Unlimited attempts</span></div>' +
+      '</section>' +
+      '<div class="card rules-card"><h3>Before you start</h3><ul class="rules">' +
+        '<li>' + icon('timer', 16) + '<span>The timer starts when you press Start.</span></li>' +
+        '<li>' + icon('file', 16) + '<span>Questions stay hidden until then.</span></li>' +
+        '<li>' + icon('target', 16) + '<span>MSQ is all-or-nothing. Unanswered questions score zero.</span></li>' +
+        '<li>' + icon('check', 16) + '<span>Press End when you are done; the attempt is saved to history.</span></li>' +
+      '</ul></div>' +
+      '<button class="btn primary wide" data-action="begin-attempt" type="button">' + icon('play', 18) + ' Start</button>' +
+      '<button class="btn ghost wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '" type="button">Cancel</button>';
+
+      setScreen(shell({ title: 'Attempt', back: '/quizzes/' + encodeURIComponent(quiz.id), content: content }));
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({ title: 'Attempt', back: '/', content: errorState(e.message, 'retry') }));
+    }
+  }
+
+  function beginAttempt() {
+    if (!attemptPreload) return;
+    var data = attemptPreload;
+    attempt = {
+      quiz: data.quiz,
+      questions: data.questions || [],
+      answers: {},
+      startedAt: new Date(),
+      running: true,
+      timerId: null
+    };
+    renderRunning();
+    document.getElementById('screen').scrollTop = 0;
+    startTimer();
+  }
+
+  function renderRunning() {
+    var quiz = attempt.quiz;
+    var total = attempt.questions.length;
+    var content = '<div class="progress-meta"><span id="progress-count">0 / ' + total + ' answered</span><span>Take your time</span></div>' +
+      '<div class="progress"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>' +
+      '<div class="question-list">' + attempt.questions.map(questionCard).join('') + '</div>';
+    var footer = '<div class="footer attempt-footer"><div class="footer-progress"><span id="footer-answered">0</span> of ' + total + ' answered</div><button class="btn primary" data-action="end-attempt" type="button">End attempt</button></div>';
+    setScreen('<div class="screen">' +
+      '<header class="appbar">' +
+        '<button class="icon-btn" data-action="attempt-exit" aria-label="Close attempt">' + icon('x', 20) + '</button>' +
+        '<div class="timer-chip">' + icon('timer', 14) + '<span id="attempt-timer">00:00</span></div>' +
+        '<div class="appbar-actions"><button class="btn outline small" data-action="end-attempt" type="button">End</button></div>' +
+      '</header>' +
+      offlineBanner() +
+      '<main class="content">' + content + '</main>' +
+      footer +
+    '</div>');
+    updateAttemptChrome();
+  }
+
+  async function renderResult(params, query, token) {
+    skeletonScreen('Result', '/', 4);
+    try {
+      var data = await api.attempt(params.id);
+      if (token !== renderToken) return;
+      var a = data.attempt;
+      var quiz = data.quiz;
+      var p = pct(a.score, a.max_score);
+      var circumference = 2 * Math.PI * 52;
+      var dash = (p / 100) * circumference;
+      var message = p >= 80 ? 'Excellent work' : p >= 60 ? 'Good progress' : 'Keep practising';
+      var meterClass = p >= 80 ? '' : p >= 60 ? 'mid' : 'low';
+      var content = '<section class="result-hero">' +
+        '<div class="score-ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"></circle><circle class="meter ' + meterClass + '" cx="60" cy="60" r="52" stroke-dasharray="' + dash.toFixed(1) + ' ' + circumference.toFixed(1) + '"></circle></svg>' +
+          '<div class="score-ring-text"><span class="score-pct">' + p + '%</span><span class="score-frac">' + a.score + ' / ' + a.max_score + '</span></div>' +
+        '</div>' +
+        '<div class="eyebrow">Attempt result</div>' +
+        '<h1 class="display">' + message + '</h1>' +
+        '<p class="muted">' + esc(quiz ? quiz.title : 'Quiz') + '</p>' +
+      '</section>' +
+      '<div style="text-align:center;"><span class="saved-chip">' + icon('circleCheck', 13) + ' Saved to history</span></div>' +
+      '<div class="stat-grid">' +
+        '<div class="stat"><span class="stat-label">Score</span><span class="stat-value">' + a.score + ' / ' + a.max_score + '</span></div>' +
+        '<div class="stat"><span class="stat-label">Accuracy</span><span class="stat-value">' + p + '%</span></div>' +
+        '<div class="stat"><span class="stat-label">Time taken</span><span class="stat-value">' + formatDurationLong(a.duration_ms) + '</span></div>' +
+        '<div class="stat"><span class="stat-label">Date</span><span class="stat-value small">' + formatDate(a.started_at) + '</span></div>' +
+      '</div>' +
+      (quiz ? '<button class="btn primary wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '/attempt" type="button">' + icon('refresh', 17) + ' Try again</button>' +
+      '<button class="btn ghost wide" data-action="nav" data-hash="/quizzes/' + encodeURIComponent(quiz.id) + '" type="button">Back to quiz</button>' : emptyState('alert', 'Quiz unavailable', 'This attempt points to a quiz that no longer exists.', 'Go to library', '/'));
+
+      setScreen(shell({
+        title: 'Result',
+        back: quiz ? '/quizzes/' + encodeURIComponent(quiz.id) : '/',
+        content: content,
+        actions: quiz ? '<button class="icon-btn" data-action="quiz-actions" data-id="' + quiz.id + '" aria-label="Quiz options">' + icon('more', 19) + '</button>' : ''
+      }));
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({ title: 'Result', back: '/', content: errorState(e.message, 'retry') }));
+    }
+  }
+
+  function fileCard(f) {
+    var status = f.status === 'valid' ? '<span class="status-chip valid">Valid</span>' : f.status === 'reading' ? '<span class="status-chip reading">Reading</span>' : '<span class="status-chip invalid">Needs fixes</span>';
+    var body = '';
+    if (f.status === 'valid' && f.quiz) {
+      var counts = typeCounts(f.quiz.questions);
+      var marks = f.quiz.questions.reduce(function (s, q) { return s + (q.marks || 1); }, 0);
+      var typeBits = [];
+      if (counts.mcq) typeBits.push(counts.mcq + ' MCQ');
+      if (counts.msq) typeBits.push(counts.msq + ' MSQ');
+      if (counts.numerical) typeBits.push(counts.numerical + ' Numerical');
+      body = '<div class="file-title">' + esc(f.quiz.title || 'Untitled quiz') + '</div>' +
+        '<div class="file-meta">' + plural(f.quiz.questions.length, 'question') + ' · ' + marks + ' marks' + (typeBits.length ? ' · ' + typeBits.join(' · ') : '') + '</div>' +
+        (f.repaired ? '<div class="repair-note">Backslashes were repaired so the math stays intact. Regenerate this file as valid JSON when you can.</div>' : '');
+    } else if (f.status === 'invalid') {
+      body = '<ul class="file-errors">' + f.errors.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>';
+    } else {
+      body = '<div class="file-meta">Reading and validating…</div>';
+    }
+    return '<div class="file-card ' + f.status + '">' +
+      '<div class="file-head"><span class="file-icon">' + icon('file', 16) + '</span><span class="file-name">' + esc(f.name) + '<span class="file-size">' + formatBytes(f.size) + '</span></span>' + status +
+        (f.status === 'reading' ? '' : '<button class="icon-btn" data-action="remove-file" data-id="' + f.id + '" aria-label="Remove file">' + icon('x', 16) + '</button>') +
+      '</div>' + body +
+    '</div>';
+  }
+
+  async function renderImport(params, query, token) {
+    var folderId = query.get('folder') || '';
+    if (!folderId) {
+      go('/', 'Choose a folder before importing.', 'alert');
+      return;
+    }
+    var sampleParam = query.get('sample');
+    if (!importState || importState.folderId !== folderId) {
+      importState = { folderId: folderId, files: [], reading: false, importing: false, folder: null, autoSample: sampleParam };
+    } else if (sampleParam) {
+      importState.autoSample = sampleParam;
+    }
+
+    setScreen(shell({ title: 'Import', back: '/folders/' + encodeURIComponent(folderId), content: '<div class="skeleton-row"><div class="s-icon skeleton"></div><div class="s-lines"><div class="s-line mid skeleton"></div><div class="s-line short skeleton"></div></div></div>' }));
+
+    try {
+      var data = await api.folderContents(folderId);
+      if (token !== renderToken) return;
+      if (!data.folder) throw new Error('Choose a folder before importing.');
+      importState.folder = data.folder;
+
+      if (importState.autoSample && !importState.files.length) {
+        var kind = importState.autoSample;
+        importState.autoSample = null;
+        history.replaceState(null, '', '#/import?folder=' + encodeURIComponent(folderId));
+        addTextFile(kind === 'invalid' ? 'broken-quiz.json' : 'quiz.json', kind === 'invalid' ? INVALID_SAMPLE : SAMPLE_TEXT);
+      }
+
+      drawImport();
+    } catch (e) {
+      if (token !== renderToken) return;
+      setScreen(shell({ title: 'Import', back: '/folders/' + encodeURIComponent(folderId), content: errorState(e.message, 'retry') }));
+    }
+  }
+
+  function drawImport() {
+    if (!importState) return;
+    var st = importState;
+    var folder = st.folder;
+    var valid = st.files.filter(function (f) { return f.status === 'valid'; });
+    var invalid = st.files.filter(function (f) { return f.status === 'invalid'; });
+    var totalQuestions = valid.reduce(function (s, f) { return s + (f.quiz ? f.quiz.questions.length : 0); }, 0);
+    var totalSize = st.files.reduce(function (s, f) { return s + f.size; }, 0);
+
+    var content = '<div class="import-target">' + icon('folder', 16) + '<span>Import into <strong>' + esc(folder ? folder.name : 'folder') + '</strong></span></div>';
+
+    if (!st.files.length) {
+      content += '<div class="dropzone" id="dropzone">' +
+        '<div class="drop-icon">' + icon('upload', 24) + '</div>' +
+        '<h2>Choose JSON files</h2>' +
+        '<p>One or more quiz files · .json · max 5 MB each</p>' +
+        '<button class="btn primary" data-action="choose-files" type="button">Choose files</button>' +
+        '<div class="drop-links"><button class="text-btn" data-action="load-sample" type="button">Try the sample quiz</button></div>' +
+      '</div>' +
+      '<input type="file" id="file-input" accept=".json,application/json" multiple hidden>';
+    } else {
+      content += '<div class="dropzone" id="dropzone" style="padding:18px 14px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;text-align:left;">' +
+          '<div class="drop-icon" style="width:38px;height:38px;border-radius:11px;margin:0;">' + icon('upload', 18) + '</div>' +
+          '<div style="flex:1;"><div style="font-size:13px;font-weight:650;">Add more files</div><div class="muted small">Drop files here or choose again</div></div>' +
+          '<button class="btn secondary small" data-action="choose-files" type="button">Choose</button>' +
+        '</div>' +
+      '</div>' +
+      '<input type="file" id="file-input" accept=".json,application/json" multiple hidden>' +
+      '<div class="file-list">' + st.files.map(fileCard).join('') + '</div>' +
+      '<div class="batch-summary"><span>' + (valid.length ? valid.length + ' valid' : 'No valid files') + (invalid.length ? ' · ' + invalid.length + ' skipped' : '') + '</span><span>' + plural(totalQuestions, 'question') + (totalSize ? ' · ' + formatBytes(totalSize) : '') + '</span></div>';
+    }
+
+    if (st.reading) {
+      content += '<div class="card" style="margin-top:12px;display:flex;align-items:center;gap:10px;"><span class="spinner" style="width:16px;height:16px;border:2px solid var(--accent);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;"></span><span class="small muted">Reading and validating files…</span></div>';
+    }
+
+    var footer = '';
+    if (st.files.length) {
+      footer = '<div class="footer import-footer"><div class="footer-progress">' + plural(st.files.length, 'file') + '</div>' +
+        '<button class="btn primary" data-action="import-files" type="button"' + (valid.length && !st.reading && !st.importing ? '' : ' disabled') + '>' +
+        (st.importing ? '<span class="spinner"></span> Importing…' : 'Import ' + valid.length + ' quiz' + (valid.length === 1 ? '' : 'zes')) +
+        '</button></div>';
+    }
+
+    setScreen(shell({ title: 'Import', back: '/folders/' + encodeURIComponent(st.folderId), content: content, footer: footer }));
+    setUpDropzone();
+  }
+
+  function setUpDropzone() {
+    var dz = document.getElementById('dropzone');
+    var input = document.getElementById('file-input');
+    if (!dz || !input) return;
+    dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('dragging'); });
+    dz.addEventListener('dragleave', function () { dz.classList.remove('dragging'); });
+    dz.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dz.classList.remove('dragging');
+      if (e.dataTransfer && e.dataTransfer.files) addFiles(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+    input.addEventListener('change', function () {
+      addFiles(Array.prototype.slice.call(input.files || []));
+      input.value = '';
+    });
+    dz.addEventListener('click', function (e) {
+      if (e.target.closest('button')) return;
+      input.click();
+    });
+  }
+
+  function addTextFile(name, text) {
+    if (!importState) return;
+    importState.files = importState.files.filter(function (f) { return f.name !== name; });
+    var f = {
+      id: uuid(), name: name, size: text.length, status: 'reading', quiz: null, errors: [], repaired: false, _text: text
+    };
+    importState.files.push(f);
+    importState.reading = true;
+    drawImport();
+    setTimeout(function () {
+      var result = validateFileText(name, text, f.size);
+      f.status = result.status;
+      f.quiz = result.quiz;
+      f.errors = result.errors;
+      f.repaired = result.repaired;
+      importState.reading = importState.files.some(function (x) { return x.status === 'reading'; });
+      drawImport();
+    }, 450);
+  }
+
+  async function addFiles(files) {
+    if (!importState) return;
+    if (!files.length) return;
+    if (files.length + importState.files.length > 50) {
+      showToast('You can add up to 50 files at a time.', 'alert');
+      files = files.slice(0, Math.max(0, 50 - importState.files.length));
+    }
+    var total = importState.files.reduce(function (s, f) { return s + f.size; }, 0) + files.reduce(function (s, f) { return s + f.size; }, 0);
+    if (total > 20 * 1024 * 1024) {
+      showToast('The batch is larger than 20 MB.', 'alert');
+      return;
+    }
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var f = { id: uuid(), name: file.name, size: file.size, status: 'reading', quiz: null, errors: [], repaired: false };
+      importState.files.push(f);
+      if (file.size > 5 * 1024 * 1024) {
+        f.status = 'invalid';
+        f.errors = ['This file is larger than 5 MB.'];
+        continue;
+      }
+      try {
+        var text = await file.text();
+        var result = validateFileText(file.name, text, file.size);
+        f.status = result.status;
+        f.quiz = result.quiz;
+        f.errors = result.errors;
+        f.repaired = result.repaired;
+      } catch (e) {
+        f.status = 'invalid';
+        f.errors = ['This file could not be read.'];
+      }
+    }
+    importState.reading = false;
+    drawImport();
+  }
+
+  function validateFileText(name, text, size) {
+    if (size > 5 * 1024 * 1024) return { status: 'invalid', errors: ['This file is larger than 5 MB.'], quiz: null, repaired: false };
+    var parsed;
+    try {
+      parsed = parseJsonLoose(text);
+    } catch (e) {
+      return { status: 'invalid', errors: [e.message], quiz: null, repaired: false };
+    }
+    var canonical = canonicalizeQuiz(parsed.value);
+    if (canonical.errors.length) {
+      return { status: 'invalid', errors: canonical.errors, quiz: canonical.quiz, repaired: parsed.repaired };
+    }
+    return { status: 'valid', errors: [], quiz: canonical.quiz, repaired: parsed.repaired };
+  }
+
+  async function importFiles() {
+    if (!importState || importState.importing) return;
+    if (guardOffline()) return;
+    var valid = importState.files.filter(function (f) { return f.status === 'valid'; });
+    if (!valid.length) {
+      showToast('There are no valid quizzes to import.', 'alert');
+      return;
+    }
+    importState.importing = true;
+    drawImport();
+    try {
+      var result = await api.importQuizzes(importState.folderId, valid.map(function (f) { return f.quiz; }));
+      var imported = result.imported || [];
+      var skipped = (result.skipped || []).length + importState.files.filter(function (f) { return f.status === 'invalid'; }).length;
+      var folderId = importState.folderId;
+      importState = null;
+      if (imported.length === 1) {
+        go('/quizzes/' + imported[0].id, 'Quiz imported' + (skipped ? ' · ' + skipped + ' skipped' : ''), 'check');
+      } else {
+        go('/folders/' + folderId, imported.length + ' quizzes imported' + (skipped ? ' · ' + skipped + ' skipped' : ''), 'check');
+      }
+    } catch (e) {
+      importState.importing = false;
+      drawImport();
+      showToast(e.message || 'The import failed. Please try again.', 'alert');
+    }
+  }
+
+  /* ============================================================
+     7. Overlays, actions
+     ============================================================ */
+  async function folderInfo(folderId) {
+    if (screenData.folder) {
+      if (screenData.folder.folder && screenData.folder.folder.id === folderId) {
+        return { name: screenData.folder.folder.name, folders: screenData.folder.folders.length, quizzes: screenData.folder.quizzes.length };
+      }
+      var row = (screenData.folder.folders || []).find(function (f) { return f.id === folderId; });
+      if (row) return { name: row.name, folders: row.folder_count, quizzes: row.quiz_count };
+    }
+    try {
+      var d = await api.folderContents(folderId);
+      return d.folder ? { name: d.folder.name, folders: d.folders.length, quizzes: d.quizzes.length } : null;
+    } catch (e) { return null; }
+  }
+
+  async function quizInfo(quizId) {
+    if (screenData.quiz && screenData.quiz.quiz.id === quizId) {
+      return {
+        quiz: screenData.quiz.quiz,
+        question_count: screenData.quiz.questions.length,
+        attempt_count: screenData.quiz.attempts.length
+      };
+    }
+    if (screenData.folder) {
+      var row = (screenData.folder.quizzes || []).find(function (q) { return q.id === quizId; });
+      if (row) return { quiz: { id: row.id, title: row.title, folder_id: row.folder_id }, question_count: row.question_count, attempt_count: row.attempt_count };
+    }
+    try {
+      var d = await api.quiz(quizId);
+      return { quiz: d.quiz, question_count: d.questions.length, attempt_count: d.attempts.length };
+    } catch (e) { return null; }
+  }
+
+  async function folderActions(folderId) {
+    var info = await folderInfo(folderId);
+    if (!info) { showToast('This folder is no longer available.', 'alert'); return; }
+    openOverlay(sheet(
+      '<h3>' + esc(info.name) + '</h3>' +
+      '<p class="sheet-sub">' + plural(info.folders, 'folder') + ' · ' + plural(info.quizzes, 'quiz', 'quizzes') + '</p>' +
+      '<div class="sheet-actions row-actions">' +
+        '<button class="action-row" data-action="rename-folder" data-id="' + folderId + '" type="button">' + icon('pencil', 18) + ' Rename folder</button>' +
+        '<button class="action-row destructive" data-action="delete-folder" data-id="' + folderId + '" type="button">' + icon('trash', 18) + ' Delete folder</button>' +
+      '</div>'
+    ));
+  }
+
+  async function quizActions(quizId) {
+    var info = await quizInfo(quizId);
+    if (!info) { showToast('This quiz is no longer available.', 'alert'); return; }
+    openOverlay(sheet(
+      '<h3>' + esc(info.quiz.title) + '</h3>' +
+      '<p class="sheet-sub">' + plural(info.question_count, 'question') + ' · ' + plural(info.attempt_count, 'attempt') + '</p>' +
+      '<div class="sheet-actions row-actions">' +
+        '<button class="action-row destructive" data-action="delete-quiz" data-id="' + quizId + '" type="button">' + icon('trash', 18) + ' Delete quiz</button>' +
+      '</div>'
+    ));
+  }
+
+  function fabSheet(folderId) {
+    var folder = null;
+    if (screenData.folder) {
+      if (screenData.folder.folder && screenData.folder.folder.id === folderId) {
+        folder = screenData.folder.folder;
+      } else {
+        folder = (screenData.folder.folders || []).find(function (f) { return f.id === folderId; }) || null;
+      }
+    }
+    var content = '<h3>Add to ' + esc(folder ? folder.name : 'library') + '</h3>' +
+      '<p class="sheet-sub">' + (folder ? 'Create a sub-folder or import one or more quiz files.' : 'Create a top-level folder to hold your quizzes.') + '</p>' +
+      '<div class="sheet-actions row-actions">' +
+        '<button class="action-row" data-action="new-folder" data-parent="' + (folder ? folder.id : '') + '" type="button">' + icon('folderPlus', 18) + ' New folder</button>' +
+        (folder ? '<button class="action-row" data-action="nav" data-hash="/import?folder=' + encodeURIComponent(folder.id) + '" type="button">' + icon('upload', 18) + ' Import quizzes</button>' : '') +
+      '</div>';
+    openOverlay(sheet(content));
+  }
+
+  function newFolderSheet(parentId) {
+    var parent = null;
+    if (parentId && screenData.folder) {
+      if (screenData.folder.folder && screenData.folder.folder.id === parentId) parent = screenData.folder.folder;
+      else parent = (screenData.folder.folders || []).find(function (f) { return f.id === parentId; }) || null;
+    }
+    openOverlay(sheet(
+      '<h3>New folder</h3>' +
+      '<p class="sheet-sub">' + (parent ? 'Inside ' + esc(parent.name) : 'At the top level of your library') + '</p>' +
+      '<form data-form="new-folder" data-parent="' + esc(parentId || '') + '">' +
+        '<div class="field"><label for="folder-name">Folder name</label><input class="input" id="folder-name" name="name" maxlength="60" autocomplete="off" placeholder="e.g. Organic Chemistry"><div class="field-error" id="folder-error"></div></div>' +
+        '<div class="dialog-actions"><button class="btn ghost" type="button" data-action="close-sheet">Cancel</button><button class="btn primary" type="submit">Create</button></div>' +
+      '</form>'
+    ), '#folder-name');
+  }
+
+  function renameFolderSheet(folderId) {
+    var f = null;
+    if (screenData.folder) {
+      if (screenData.folder.folder && screenData.folder.folder.id === folderId) f = screenData.folder.folder;
+      else f = (screenData.folder.folders || []).find(function (x) { return x.id === folderId; }) || null;
+    }
+    if (!f) { showToast('This folder is no longer available.', 'alert'); return; }
+    openOverlay(sheet(
+      '<h3>Rename folder</h3>' +
+      '<p class="sheet-sub">Give the folder a clear, short name.</p>' +
+      '<form data-form="rename-folder" data-id="' + f.id + '">' +
+        '<div class="field"><label for="folder-name">Folder name</label><input class="input" id="folder-name" name="name" maxlength="60" autocomplete="off" value="' + esc(f.name) + '"><div class="field-error" id="folder-error"></div></div>' +
+        '<div class="dialog-actions"><button class="btn ghost" type="button" data-action="close-sheet">Cancel</button><button class="btn primary" type="submit">Save</button></div>' +
+      '</form>'
+    ), '#folder-name');
+  }
+
+  async function deleteFolderSheet(folderId) {
+    try {
+      var preview = await api.folderDeletePreview(folderId);
+      if (isOffline()) { showToast('You are offline. Reconnect to delete.', 'alert'); return; }
+      openOverlay(sheet(
+        '<h3>Delete "' + esc(preview.folder.name) + '"?</h3>' +
+        '<p class="sheet-sub">This removes the folder and everything inside it. This cannot be undone.</p>' +
+        '<div class="danger-copy">' + plural(preview.folders, 'sub-folder') + ' · ' + plural(preview.quizzes, 'quiz', 'quizzes') + ' · ' + plural(preview.attempts, 'stored attempt') + '</div>' +
+        '<div class="dialog-actions"><button class="btn ghost" type="button" data-action="close-sheet">Cancel</button><button class="btn danger" data-action="confirm-delete-folder" data-id="' + folderId + '" data-parent="' + esc(preview.folder.parent_folder_id || '') + '" type="button">Delete folder</button></div>'
+      ));
+    } catch (e) {
+      showToast(e.message || 'Could not load the delete preview.', 'alert');
+    }
+  }
+
+  async function deleteQuizSheet(quizId) {
+    var info = await quizInfo(quizId);
+    if (!info) { showToast('This quiz is no longer available.', 'alert'); return; }
+    openOverlay(sheet(
+      '<h3>Delete "' + esc(info.quiz.title) + '"?</h3>' +
+      '<p class="sheet-sub">The quiz and its history will be removed. This cannot be undone.</p>' +
+      '<div class="danger-copy">' + plural(info.question_count, 'question') + ' · ' + plural(info.attempt_count, 'stored attempt') + '</div>' +
+      '<div class="dialog-actions"><button class="btn ghost" type="button" data-action="close-sheet">Cancel</button><button class="btn danger" data-action="confirm-delete-quiz" data-id="' + quizId + '" data-folder="' + esc(info.quiz.folder_id || '') + '" type="button">Delete quiz</button></div>'
+    ));
+  }
+
+  function endAttemptSheet() {
+    if (!attempt) return;
+    var answered = attemptAnsweredCount();
+    var total = attempt.questions.length;
+    var unanswered = total - answered;
+    openOverlay(sheet(
+      '<h3>End this attempt?</h3>' +
+      '<p class="sheet-sub">You answered ' + answered + ' of ' + total + ' questions.' + (unanswered ? ' ' + unanswered + ' unanswered question' + (unanswered === 1 ? '' : 's') + ' will score zero.' : '') + '</p>' +
+      '<div class="dialog-actions" style="flex-direction:column;">' +
+        '<button class="btn primary wide" data-action="confirm-end" type="button">End and see result</button>' +
+        '<button class="btn ghost wide" data-action="close-sheet" type="button">Keep going</button>' +
+      '</div>'
+    ));
+  }
+
+  function discardAttemptSheet() {
+    openOverlay(sheet(
+      '<h3>Discard this attempt?</h3>' +
+      '<p class="sheet-sub">Your answers will not be saved, and no history row will be created.</p>' +
+      '<div class="dialog-actions" style="flex-direction:column;">' +
+        '<button class="btn danger wide" data-action="confirm-discard" type="button">Discard attempt</button>' +
+        '<button class="btn ghost wide" data-action="close-sheet" type="button">Keep going</button>' +
+      '</div>'
+    ));
+  }
+
+  function clearAttempt() {
+    if (!attempt) return;
+    stopTimer();
+    attempt = null;
+    attemptPreload = null;
+  }
+
+  async function confirmEndAttempt() {
+    if (!attempt) return;
+    if (guardOffline()) return;
+    var btn = $('[data-action="confirm-end"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving…'; }
+    var quizId = attempt.quiz.id;
+    var payload = {
+      quiz_id: quizId,
+      started_at: attempt.startedAt.toISOString(),
+      ended_at: new Date().toISOString(),
+      answers: attempt.answers
+    };
+    try {
+      var result = await api.saveAttempt(payload);
+      clearAttempt();
+      closeOverlay();
+      go('/quizzes/' + encodeURIComponent(quizId) + '/result/' + encodeURIComponent(result.attempt.id), 'Attempt saved', 'check');
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'End and see result'; }
+      showToast(e.message || 'Could not save the attempt. Try again.', 'alert');
+    }
+  }
+
+  function confirmDiscard() {
+    if (!attempt) return;
+    var quizId = attempt.quiz.id;
+    clearAttempt();
+    closeOverlay();
+    go('/quizzes/' + encodeURIComponent(quizId));
+  }
+
+  function attemptExit() {
+    if (!attempt) return;
+    attempt.pendingExitHash = '/quizzes/' + encodeURIComponent(attempt.quiz.id);
+    discardAttemptSheet();
+  }
+
+  /* ============================================================
+     8. Events
+     ============================================================ */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-action]');
+    if (!el) return;
+    var action = el.getAttribute('data-action');
+    var id = el.getAttribute('data-id');
+    var hash = el.getAttribute('data-hash');
+
+    switch (action) {
+      case 'nav':
+        if (hash) go(hash);
+        break;
+      case 'close-sheet':
+        closeOverlay();
+        break;
+      case 'retry':
+        closeOverlay();
+        renderRoute();
+        break;
+      case 'fab':
+        closeOverlay();
+        fabSheet(el.getAttribute('data-folder'));
+        break;
+      case 'fab-from-empty':
+        closeOverlay();
+        fabSheet(el.getAttribute('data-folder') || 'root');
+        break;
+      case 'folder-actions':
+        closeOverlay();
+        folderActions(id);
+        break;
+      case 'quiz-actions':
+        closeOverlay();
+        quizActions(id);
+        break;
+      case 'new-folder':
+        closeOverlay();
+        newFolderSheet(el.getAttribute('data-parent') || '');
+        break;
+      case 'rename-folder':
+        closeOverlay();
+        renameFolderSheet(id);
+        break;
+      case 'delete-folder':
+        closeOverlay();
+        deleteFolderSheet(id);
+        break;
+      case 'delete-quiz':
+        closeOverlay();
+        deleteQuizSheet(id);
+        break;
+      case 'confirm-delete-folder':
+        (async function () {
+          if (guardOffline()) return;
+          el.disabled = true; el.innerHTML = '<span class="spinner"></span> Deleting…';
+          try {
+            var parent = el.getAttribute('data-parent') || null;
+            await api.deleteFolder(id);
+            closeOverlay();
+            go(parent ? '/folders/' + encodeURIComponent(parent) : '/', 'Folder deleted', 'trash');
+          } catch (err) { el.disabled = false; el.textContent = 'Delete folder'; showToast(err.message, 'alert'); }
+        })();
+        break;
+      case 'confirm-delete-quiz':
+        (async function () {
+          if (guardOffline()) return;
+          el.disabled = true; el.innerHTML = '<span class="spinner"></span> Deleting…';
+          try {
+            var folderId = el.getAttribute('data-folder') || null;
+            await api.deleteQuiz(id);
+            closeOverlay();
+            go(folderId ? '/folders/' + encodeURIComponent(folderId) : '/', 'Quiz deleted', 'trash');
+          } catch (err) { el.disabled = false; el.textContent = 'Delete quiz'; showToast(err.message, 'alert'); }
+        })();
+        break;
+      case 'begin-attempt':
+        if (guardOffline()) return;
+        beginAttempt();
+        break;
+      case 'attempt-exit':
+        attemptExit();
+        break;
+      case 'end-attempt':
+        openOverlay('');
+        endAttemptSheet();
+        break;
+      case 'confirm-end':
+        confirmEndAttempt();
+        break;
+      case 'confirm-discard':
+        confirmDiscard();
+        break;
+      case 'choose-files':
+        closeOverlay();
+        var fi = document.getElementById('file-input');
+        if (fi) fi.click();
+        break;
+      case 'load-sample':
+        addTextFile('quiz.json', SAMPLE_TEXT);
+        break;
+      case 'remove-file':
+        if (importState) {
+          importState.files = importState.files.filter(function (f) { return f.id !== id; });
+          drawImport();
+        }
+        break;
+      case 'import-files':
+        importFiles();
+        break;
+      case 'choose-mcq':
+        if (!attempt) return;
+        attempt.answers[el.getAttribute('data-qid')] = el.getAttribute('data-oid');
+        var qid = el.getAttribute('data-qid');
+        var card = el.closest('[data-question]');
+        if (card) {
+          $$('.option', card).forEach(function (o) {
+            o.classList.toggle('selected', o.getAttribute('data-oid') === el.getAttribute('data-oid'));
+            o.setAttribute('aria-pressed', o === el ? 'true' : 'false');
+          });
+        }
+        updateAttemptChrome();
+        break;
+      case 'toggle-msq':
+        if (!attempt) return;
+        var mqid = el.getAttribute('data-qid');
+        var oid = el.getAttribute('data-oid');
+        var arr = Array.isArray(attempt.answers[mqid]) ? attempt.answers[mqid].slice() : [];
+        var pos = arr.indexOf(oid);
+        if (pos === -1) arr.push(oid); else arr.splice(pos, 1);
+        attempt.answers[mqid] = arr;
+        el.classList.toggle('selected', arr.indexOf(oid) !== -1);
+        el.setAttribute('aria-pressed', arr.indexOf(oid) !== -1 ? 'true' : 'false');
+        updateAttemptChrome();
+        break;
+      default:
+        break;
+    }
+  });
+
+  document.addEventListener('input', function (e) {
+    var input = e.target.closest('[data-numeric]');
+    if (!input || !attempt) return;
+    attempt.answers[input.getAttribute('data-qid')] = input.value;
+    updateAttemptChrome();
+  });
+
+  document.addEventListener('submit', async function (e) {
+    var form = e.target.closest('form[data-form]');
+    if (!form) return;
+    e.preventDefault();
+    if (guardOffline()) return;
+    var kind = form.getAttribute('data-form');
+    var nameInput = form.querySelector('input[name="name"]');
+    var errorEl = form.querySelector('#folder-error');
+    var submit = form.querySelector('button[type="submit"]');
+    var name = nameInput ? nameInput.value.trim() : '';
+    if (!name) {
+      if (errorEl) errorEl.textContent = 'Give the folder a name.';
+      if (nameInput) nameInput.focus();
+      return;
+    }
+    if (name.length > 60) {
+      if (errorEl) errorEl.textContent = 'Use 60 characters or fewer.';
+      return;
+    }
+    if (errorEl) errorEl.textContent = '';
+    submit.disabled = true;
+    var original = submit.innerHTML;
+    submit.innerHTML = '<span class="spinner"></span> Saving…';
+    try {
+      if (kind === 'new-folder') {
+        var parent = form.getAttribute('data-parent') || null;
+        await api.createFolder(parent, name);
+        closeOverlay();
+        renderRoute();
+        showToast('Folder created', 'check');
+      } else if (kind === 'rename-folder') {
+        await api.renameFolder(form.getAttribute('data-id'), name);
+        closeOverlay();
+        renderRoute();
+        showToast('Folder renamed', 'check');
+      }
+    } catch (err) {
+      if (errorEl) errorEl.textContent = err.message || 'Could not save the folder.';
+      submit.disabled = false;
+      submit.innerHTML = original;
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeOverlay();
+  });
+
+  window.addEventListener('hashchange', function () {
+    if (attempt && attempt.running) {
+      var expected = '#/quizzes/' + attempt.quiz.id + '/attempt';
+      if (location.hash !== expected) {
+        var target = location.hash;
+        history.replaceState(null, '', expected);
+        attempt.pendingExitHash = target;
+        discardAttemptSheet();
+        return;
+      }
+    }
+    if (currentHash !== location.hash) renderRoute();
+  });
+
+  window.addEventListener('resize', function () {});
+
+  /* ============================================================
+     9. Dev toolbar
+     ============================================================ */
+  function setTheme(theme, persist) {
+    document.documentElement.setAttribute('data-theme', theme);
+    var dark = document.getElementById('dev-dark');
+    if (dark) dark.checked = theme === 'dark';
+    if (persist !== false) {
+      try { localStorage.setItem('quiz_app_mock_theme', theme); } catch (e) {}
+    }
+  }
+
+  function renderNetlog() {
+    var list = document.getElementById('netlog-list');
+    if (!list) return;
+    var count = document.getElementById('netlog-count');
+    if (count) count.textContent = String(netlog.length);
+    list.innerHTML = netlog.map(function (r) {
+      var cls = r.status >= 500 ? 'status-5' : r.status >= 400 ? 'status-4' : 'status-2';
+      return '<li><span class="method">' + esc(r.method) + '</span><span class="path">' + esc(r.path) + '</span><span class="status ' + cls + '">' + r.status + '</span></li>';
+    }).join('');
+  }
+
+  function syncDevScreen(value) {
+    var sel = document.getElementById('dev-screen');
+    if (!sel) return;
+    var exists = Array.prototype.some.call(sel.options, function (o) { return o.value === value; });
+    var current = sel.querySelector('option[data-current]');
+    if (current) current.remove();
+    if (!exists) {
+      var opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = 'Current · ' + value;
+      opt.setAttribute('data-current', '');
+      sel.appendChild(opt);
+    }
+    sel.value = value;
+  }
+
+  function setupDevTools() {
+    var screenSelect = document.getElementById('dev-screen');
+    if (screenSelect) {
+      screenSelect.addEventListener('change', function () {
+        closeOverlay();
+        go(screenSelect.value);
+      });
+    }
+    document.querySelectorAll('[data-latency]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        window.__mock.latencyMs = Number(btn.getAttribute('data-latency'));
+        document.querySelectorAll('[data-latency]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+        var lv = document.getElementById('latency-value');
+        if (lv) lv.textContent = window.__mock.latencyMs + ' ms';
+      });
+    });
+    document.querySelectorAll('[data-error]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        window.__mock.errorRate = Number(btn.getAttribute('data-error'));
+        document.querySelectorAll('[data-error]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+        var ev = document.getElementById('error-value');
+        if (ev) ev.textContent = window.__mock.errorRate + '%';
+      });
+    });
+    var offline = document.getElementById('dev-offline');
+    if (offline) {
+      offline.addEventListener('change', function () {
+        window.__mock.offline = offline.checked;
+        renderRoute();
+      });
+    }
+    var dark = document.getElementById('dev-dark');
+    if (dark) {
+      dark.addEventListener('change', function () {
+        setTheme(dark.checked ? 'dark' : 'light', true);
+      });
+    }
+    var shot = document.getElementById('dev-shot');
+    if (shot) {
+      shot.addEventListener('change', function () {
+        document.body.classList.toggle('screenshot-mode', shot.checked);
+      });
+    }
+    var exit = document.getElementById('screenshot-exit');
+    if (exit) {
+      exit.addEventListener('click', function () {
+        document.body.classList.remove('screenshot-mode');
+        if (shot) shot.checked = false;
+      });
+    }
+    document.querySelectorAll('[data-dev]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-dev');
+        if (action === 'reset') {
+          resetDb();
+          closeOverlay();
+          clearAttempt();
+          importState = null;
+          go('/', 'Mock data reset', 'refresh');
+        } else if (action === 'sample') {
+          closeOverlay();
+          go('/import?folder=f-net&sample=valid');
+        } else if (action === 'invalid') {
+          closeOverlay();
+          go('/import?folder=f-net&sample=invalid');
+        } else if (action === 'empty') {
+          closeOverlay();
+          go('/folders/f-empty');
+        }
+      });
+    });
+  }
+
+  /* ============================================================
+     10. Boot
+     ============================================================ */
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem('quiz_app_mock_theme'); } catch (e) {}
+  setTheme(savedTheme || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'), false);
+  setupDevTools();
+  if (!location.hash) history.replaceState(null, '', '#/');
+  renderRoute();
+})();
+</script>
+</body>
+</html>
