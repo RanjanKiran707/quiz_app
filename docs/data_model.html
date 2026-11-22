@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz App — Data Model</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --panel: #fbfbf9;
+    --ink: #1c1c1a;
+    --muted: #6b6b66;
+    --line: #e4e4df;
+    --line-strong: #d5d5cd;
+    --accent: #3a5a40;
+    --accent-soft: #eef3ef;
+    --warn: #8a5a00;
+    --warn-soft: #fdf5e6;
+    --pk: #3a5a40;
+    --fk: #6b5b95;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1320px; margin: 0 auto; padding: 48px 24px 88px; }
+  header { margin-bottom: 30px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 10px; }
+  h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: 17px; max-width: 780px; margin: 0 0 18px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { display: inline-block; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12.5px; color: var(--muted); }
+  .pill.status { background: var(--warn-soft); color: var(--warn); border-color: #f0dfbc; font-weight: 600; }
+  section { margin-top: 34px; }
+  h2 { font-size: 20px; margin: 0 0 14px; letter-spacing: -.01em; }
+  h3 { font-size: 15px; margin: 0 0 6px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .grid > * { min-width: 0; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px 17px; }
+  .stat .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .stat .value { font-size: 16px; font-weight: 650; margin-top: 3px; }
+  .diagram-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; min-width: 0; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .toolbar .title { font-size: 13px; font-weight: 650; }
+  .toolbar .hint { font-size: 12px; color: var(--muted); }
+  .actions { display: flex; gap: 6px; }
+  .btn {
+    appearance: none; border: 1px solid var(--line-strong); background: var(--surface);
+    color: var(--ink); border-radius: 8px; padding: 6px 10px; font-size: 12.5px;
+    cursor: pointer; font-weight: 550;
+  }
+  .btn:hover { background: #f2f2ee; }
+  .btn.primary { border-color: var(--accent); color: var(--accent); }
+  .diagram-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 350px; }
+  #cy {
+    height: 650px;
+    background-color: #fcfcfa;
+    background-image: radial-gradient(#ddddd5 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  #panel { border-left: 1px solid var(--line); background: var(--panel); padding: 20px 20px 28px; overflow-y: auto; max-height: 650px; }
+  .panel-kicker { font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; }
+  .panel-title { font-size: 19px; margin: 3px 0 8px; letter-spacing: -.01em; }
+  .panel-purpose { color: var(--muted); font-size: 13.5px; margin-bottom: 16px; }
+  .panel-section { margin-top: 18px; }
+  .panel-section h4 { margin: 0 0 7px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .panel-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .panel-table td { padding: 6px 6px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .panel-table tr:last-child td { border-bottom: 0; }
+  .panel-table .col { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .panel-table .type { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .key { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; padding: 1px 4px; border-radius: 4px; vertical-align: 1px; }
+  .key.pk { background: var(--accent-soft); color: var(--pk); }
+  .key.fk { background: #f0eef7; color: var(--fk); }
+  .rel-list { margin: 0; padding-left: 16px; font-size: 12.5px; }
+  .rel-list li { margin: 7px 0; }
+  .rel-card { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; margin: 7px 0; font-size: 12.5px; }
+  .rel-card .card-line { font-weight: 650; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 11px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .dot.fk { background: var(--fk); }
+  .schema-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; }
+  .schema-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; min-width: 0; }
+  .schema-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .schema-head h3 { font-size: 16px; }
+  .table-name { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); }
+  .fields { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12.5px; }
+  .fields th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 6px 6px 6px 0; border-bottom: 1px solid var(--line-strong); }
+  .fields td { padding: 7px 6px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .fields tr:last-child td { border-bottom: 0; }
+  .fields .col { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+  .fields .type { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); white-space: nowrap; }
+  .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .rule-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .rule-card h3 { margin-bottom: 8px; }
+  .rule-card ul { margin: 0; padding-left: 18px; font-size: 13px; }
+  .rule-card li { margin: 6px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; background: #f1f1ee; padding: 2px 5px; border-radius: 5px; }
+  pre { background: #1f2320; color: #e8ece8; padding: 15px 17px; border-radius: 11px; overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+  .note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 13px 15px; border-radius: 0 10px 10px 0; font-size: 13.5px; }
+  footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  @media (max-width: 900px) {
+    .diagram-wrap { grid-template-columns: minmax(0, 1fr); }
+    #panel { border-left: 0; border-top: 1px solid var(--line); max-height: none; }
+    #cy { height: 520px; }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 30px 15px 64px; }
+    .schema-grid { grid-template-columns: minmax(0, 1fr); }
+    .toolbar .hint { display: none; }
+    .fields { table-layout: fixed; }
+    .fields th:nth-child(1) { width: 36%; }
+    .fields th:nth-child(2) { width: 20%; }
+    .fields .col, .fields .type { white-space: normal; overflow-wrap: anywhere; }
+    .fields td { overflow-wrap: anywhere; }
+    .panel-table .col, .panel-table .type { white-space: normal; overflow-wrap: anywhere; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Quiz App / Setup</p>
+    <h1>Data model</h1>
+    <p class="lede">
+      Five tables, one self-referencing folder tree, and cascade deletes from every parent.
+      Click any entity or relationship in the diagram to inspect it.
+    </p>
+    <div class="meta">
+      <span class="pill status">Awaiting approval</span>
+      <span class="pill">22 Nov 2026</span>
+      <span class="pill">SQLite via Drift</span>
+      <span class="pill">5 entities · 5 relationships</span>
+    </div>
+  </header>
+
+  <section class="grid" aria-label="Model summary">
+    <div class="stat"><div class="label">Entities</div><div class="value">5</div></div>
+    <div class="stat"><div class="label">Relationships</div><div class="value">5</div></div>
+    <div class="stat"><div class="label">Cascade deletes</div><div class="value">All parent → child</div></div>
+    <div class="stat"><div class="label">Attempt storage</div><div class="value">Summary + answers JSON</div></div>
+  </section>
+
+  <section class="diagram-card" aria-label="Interactive entity relationship diagram">
+    <div class="toolbar">
+      <div>
+        <span class="title">Entity relationship diagram</span>
+        <span class="hint">drag to pan · scroll to zoom · click a node or edge</span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="zoom-out" type="button" aria-label="Zoom out">−</button>
+        <button class="btn" id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button class="btn" id="fit" type="button">Fit</button>
+        <button class="btn" id="reset" type="button">Reset</button>
+        <button class="btn primary" id="to-schema" type="button">Full schema</button>
+      </div>
+    </div>
+    <div class="diagram-wrap">
+      <div id="cy" role="img" aria-label="Entity relationship diagram: Folder, Quiz, Question, QuestionOption and Attempt"></div>
+      <aside id="panel" aria-live="polite"></aside>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="key pk">PK</span> primary key</span>
+      <span class="item"><span class="key fk">FK</span> foreign key</span>
+      <span class="item"><span class="dot"></span> parent → child (1 : N)</span>
+      <span class="item">All foreign keys use <code>ON DELETE CASCADE</code></span>
+      <span class="item">The diagram is an aid; the full schema below is the reference.</span>
+    </div>
+  </section>
+
+  <section id="schema">
+    <h2>Full schema</h2>
+    <p class="small muted">Generated from the same definitions as the diagram. Types are SQLite storage types.</p>
+    <div class="schema-grid" id="schema-root"></div>
+  </section>
+
+  <section>
+    <h2>Indexes</h2>
+    <div class="rule-card">
+      <table class="fields">
+        <thead><tr><th>Index</th><th>Columns</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td class="col">idx_folder_parent</td><td class="type">folder(parent_folder_id)</td><td>List a folder's children and breadcrumb ancestors.</td></tr>
+          <tr><td class="col">idx_quiz_folder</td><td class="type">quiz(folder_id)</td><td>List quizzes in the open folder.</td></tr>
+          <tr><td class="col">idx_question_quiz</td><td class="type">question(quiz_id, position)</td><td>Load and render questions in order.</td></tr>
+          <tr><td class="col">idx_option_question</td><td class="type">question_option(question_id, position)</td><td>Load options in order.</td></tr>
+          <tr><td class="col">idx_attempt_quiz_started</td><td class="type">attempt(quiz_id, started_at DESC)</td><td>Newest-first attempt history.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rules and constraints</h2>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <h3>Enforced by the database</h3>
+        <ul>
+          <li>Primary keys are UUID strings; foreign keys are enforced.</li>
+          <li>Deleting a folder cascades to child folders, quizzes, questions, options and attempts.</li>
+          <li>Deleting a quiz cascades to its questions, options and attempts.</li>
+          <li><code>question.type</code> is one of <code>mcq</code>, <code>msq</code>, <code>numerical</code>.</li>
+          <li><code>marks &gt; 0</code>; <code>tolerance IS NULL OR tolerance &gt;= 0</code>.</li>
+          <li>Booleans are stored as <code>INTEGER</code> 0/1.</li>
+        </ul>
+      </div>
+      <div class="rule-card">
+        <h3>Enforced by the domain layer</h3>
+        <ul>
+          <li>Folder names are trimmed, 1–60 chars, and unique among siblings (case-insensitive). SQLite cannot do this reliably for root-level <code>NULL</code> parents.</li>
+          <li>MCQ has exactly one correct option; MSQ has at least one.</li>
+          <li><code>ended_at &gt;= started_at</code>; <code>duration_ms</code> is derived from both timestamps.</li>
+          <li><code>score</code> and <code>max_score</code> are computed when the attempt ends.</li>
+          <li>Numerical questions require an answer; non-numerical questions must not store one.</li>
+          <li>An attempt stores <code>max_score</code> at the time it ran, so future mark changes cannot rewrite history.</li>
+        </ul>
+      </div>
+      <div class="rule-card">
+        <h3>Import mapping</h3>
+        <ul>
+          <li><code>MCQ</code> → <code>mcq</code>, <code>MSQ</code> → <code>msq</code>, <code>NAT</code> → <code>numerical</code>.</li>
+          <li>Quiz <code>subtitle</code> → <code>quiz.subtitle</code>; <code>key</code> → <code>quiz.source_key</code> (not unique).</li>
+          <li><code>d</code> → <code>question.difficulty</code> (lower-cased); <code>e</code> → <code>explanation</code>; <code>u</code> → <code>unit</code>.</li>
+          <li>0-based option indices become rows with <code>is_correct = 1</code>.</li>
+          <li>Every question has <code>marks = 1</code> because the source format has no marks field.</li>
+          <li>Unknown fields are ignored; the original JSON is not stored.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Attempt answers JSON</h2>
+    <p class="small muted">
+      <code>attempt.answers_json</code> keeps the user's raw responses for a future review screen.
+      It is not displayed in the MVP; the result screen uses <code>score</code>, <code>max_score</code> and <code>duration_ms</code>.
+    </p>
+    <pre>{
+  "question-uuid-1": 2,
+  "question-uuid-2": [0, 3],
+  "question-uuid-3": 12.5,
+  "question-uuid-4": null
+}</pre>
+  </section>
+
+  <section>
+    <div class="note">
+      <strong>Deletion is permanent.</strong> There is no editing or restore in the MVP, so every cascade
+      delete is confirmed with counts before it runs. The confirmation names the sub-folders, quizzes
+      and attempts that will be removed.
+    </div>
+  </section>
+
+  <footer>
+    Source: <code>docs/product_spec.md</code> · Workflow: <code>Flutter/flutter_initial_setup.md</code>
+  </footer>
+
+</div>
+
+<script src="assets/cytoscape.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var entities = {
+    folder: {
+      name: 'Folder',
+      purpose: 'A node in the folder tree. A folder can hold sub-folders and quizzes; the virtual root is not stored.',
+      fields: [
+        { name: 'id', type: 'TEXT', key: 'PK', constraints: 'UUID · not null' },
+        { name: 'name', type: 'TEXT', key: '', constraints: 'not null · 1–60 chars · unique among siblings (case-insensitive)' },
+        { name: 'parent_folder_id', type: 'TEXT', key: 'FK', constraints: 'nullable → folder.id · ON DELETE CASCADE · NULL for top level' },
+        { name: 'created_at', type: 'TEXT', key: '', constraints: 'ISO-8601 UTC · not null' }
+      ],
+      rules: [
+        'The root ("All folders") is virtual and cannot be renamed or deleted.',
+        'A folder can contain both sub-folders and quizzes.',
+        'Deleting a folder removes its whole subtree after confirmation.'
+      ]
+    },
+    quiz: {
+      name: 'Quiz',
+      purpose: 'An imported set of questions. Quizzes are immutable after import and can be attempted unlimited times.',
+      fields: [
+        { name: 'id', type: 'TEXT', key: 'PK', constraints: 'UUID · not null' },
+        { name: 'folder_id', type: 'TEXT', key: 'FK', constraints: 'not null → folder.id · ON DELETE CASCADE' },
+        { name: 'title', type: 'TEXT', key: '', constraints: 'not null · ≤ 120 chars' },
+        { name: 'subtitle', type: 'TEXT', key: '', constraints: 'nullable · ≤ 240 chars · from source subtitle' },
+        { name: 'source_key', type: 'TEXT', key: '', constraints: 'nullable · from source key · not unique' },
+        { name: 'created_at', type: 'TEXT', key: '', constraints: 'ISO-8601 UTC · not null' }
+      ],
+      rules: [
+        'Importing the same file or key twice creates two independent quizzes.',
+        'Deleting a quiz removes its questions, options and attempts.',
+        'The quiz definition is a snapshot; the original JSON is not re-read.'
+      ]
+    },
+    question: {
+      name: 'Question',
+      purpose: 'One MCQ, MSQ or numerical question belonging to a quiz, ordered by position.',
+      fields: [
+        { name: 'id', type: 'TEXT', key: 'PK', constraints: 'UUID · not null' },
+        { name: 'quiz_id', type: 'TEXT', key: 'FK', constraints: 'not null → quiz.id · ON DELETE CASCADE' },
+        { name: 'prompt', type: 'TEXT', key: '', constraints: 'not null · may contain inline TeX' },
+        { name: 'type', type: 'TEXT', key: '', constraints: "not null · CHECK in ('mcq','msq','numerical')" },
+        { name: 'marks', type: 'INTEGER', key: '', constraints: 'not null · default 1 · CHECK > 0' },
+        { name: 'position', type: 'INTEGER', key: '', constraints: 'not null · 0-based within quiz' },
+        { name: 'difficulty', type: 'TEXT', key: '', constraints: "nullable · CHECK in ('easy','medium','hard')" },
+        { name: 'explanation', type: 'TEXT', key: '', constraints: 'nullable · stored for future review' },
+        { name: 'unit', type: 'TEXT', key: '', constraints: 'nullable · suffix for numerical answers' },
+        { name: 'numerical_answer', type: 'REAL', key: '', constraints: 'nullable · required when type = numerical' },
+        { name: 'tolerance', type: 'REAL', key: '', constraints: 'nullable · default 0 · CHECK >= 0' }
+      ],
+      rules: [
+        'MCQ has at least two options and exactly one correct option.',
+        'MSQ has at least two options and at least one correct option.',
+        'Numerical answers are compared with tolerance (0 by default).',
+        'Explanations and difficulty are stored but not shown in the MVP.'
+      ]
+    },
+    option: {
+      name: 'QuestionOption',
+      purpose: 'One answer choice for an MCQ or MSQ. Options are ordered and marked correct or not.',
+      fields: [
+        { name: 'id', type: 'TEXT', key: 'PK', constraints: 'UUID · not null' },
+        { name: 'question_id', type: 'TEXT', key: 'FK', constraints: 'not null → question.id · ON DELETE CASCADE' },
+        { name: 'text', type: 'TEXT', key: '', constraints: 'not null · non-empty' },
+        { name: 'is_correct', type: 'INTEGER', key: '', constraints: 'not null · default 0 · 0/1' },
+        { name: 'position', type: 'INTEGER', key: '', constraints: 'not null · 0-based within question' }
+      ],
+      rules: [
+        'Only MCQ and MSQ questions have options.',
+        'Option text is not globally unique; duplicate text within a question is rejected at import.',
+        'Deleting the question removes its options.'
+      ]
+    },
+    attempt: {
+      name: 'Attempt',
+      purpose: 'One completed run through a quiz, saved when the user presses End.',
+      fields: [
+        { name: 'id', type: 'TEXT', key: 'PK', constraints: 'UUID · not null' },
+        { name: 'quiz_id', type: 'TEXT', key: 'FK', constraints: 'not null → quiz.id · ON DELETE CASCADE' },
+        { name: 'started_at', type: 'TEXT', key: '', constraints: 'ISO-8601 UTC · not null' },
+        { name: 'ended_at', type: 'TEXT', key: '', constraints: 'ISO-8601 UTC · not null · >= started_at' },
+        { name: 'duration_ms', type: 'INTEGER', key: '', constraints: 'not null · ended_at − started_at' },
+        { name: 'score', type: 'INTEGER', key: '', constraints: 'not null · marks earned' },
+        { name: 'max_score', type: 'INTEGER', key: '', constraints: 'not null · snapshot of total marks' },
+        { name: 'answers_json', type: 'TEXT', key: '', constraints: 'not null · JSON object keyed by question id' }
+      ],
+      rules: [
+        'An attempt is written only when End is pressed.',
+        'Duration comes from timestamps, so backgrounding does not lose time.',
+        'Discarding an in-progress attempt writes nothing.',
+        'History is ordered by started_at descending.'
+      ]
+    }
+  };
+
+  var relationships = {
+    'folder-parent': {
+      source: 'folder', target: 'folder', card: '0..1 : N', label: 'parent of', self: true,
+      description: 'A folder optionally points at its parent folder. Top-level folders have a NULL parent. Deleting a parent cascades to every descendant.'
+    },
+    'folder-quiz': {
+      source: 'folder', target: 'quiz', card: '1 : N', label: 'contains',
+      description: 'A folder contains many quizzes; every quiz belongs to exactly one folder. Deleting the folder deletes its quizzes.'
+    },
+    'quiz-question': {
+      source: 'quiz', target: 'question', card: '1 : N', label: 'has',
+      description: 'A quiz contains one or more ordered questions. Deleting the quiz deletes its questions and their options.'
+    },
+    'question-option': {
+      source: 'question', target: 'option', card: '1 : N', label: 'has',
+      description: 'An MCQ or MSQ question has at least two ordered options. Deleting the question deletes its options.'
+    },
+    'quiz-attempt': {
+      source: 'quiz', target: 'attempt', card: '1 : N', label: 'records',
+      description: 'A quiz stores every completed attempt. Deleting the quiz deletes its attempt history.'
+    }
+  };
+
+  function keyTag(field) {
+    if (field.key === 'PK') return '<span class="key pk">PK</span> ';
+    if (field.key === 'FK') return '<span class="key fk">FK</span> ';
+    return '';
+  }
+
+  function nodeLabel(key) {
+    var e = entities[key];
+    var lines = [e.name, '──────────────────'];
+    e.fields.forEach(function (f) {
+      var tag = f.key === 'PK' ? '[PK]' : f.key === 'FK' ? '[FK]' : '    ';
+      lines.push(tag + '  ' + f.name);
+    });
+    return lines.join('\n');
+  }
+
+  function relationshipsFor(entityKey) {
+    return Object.keys(relationships)
+      .filter(function (id) {
+        var r = relationships[id];
+        return r.source === entityKey || r.target === entityKey;
+      })
+      .map(function (id) { return { id: id, rel: relationships[id] }; });
+  }
+
+  var panel = document.getElementById('panel');
+
+  function renderWelcome() {
+    panel.innerHTML =
+      '<div class="panel-kicker">Inspector</div>' +
+      '<div class="panel-title">Select an entity</div>' +
+      '<p class="panel-purpose">Click a table to see its columns, keys and rules. Click a line to see the relationship and its delete behaviour.</p>' +
+      '<div class="panel-section"><h4>Tables</h4>' +
+      '<ul class="rel-list">' +
+      Object.keys(entities).map(function (id) {
+        return '<li><strong>' + entities[id].name + '</strong> <span class="muted">· ' + entities[id].fields.length + ' columns</span></li>';
+      }).join('') +
+      '</ul></div>' +
+      '<div class="panel-section"><h4>Tip</h4><p class="small muted">The full schema below the diagram lists every column and constraint.</p></div>';
+  }
+
+  function renderEntity(entityKey) {
+    var e = entities[entityKey];
+    var rows = e.fields.map(function (f) {
+      return '<tr><td class="col">' + f.name + '</td>' +
+        '<td class="type">' + f.type + '</td>' +
+        '<td>' + keyTag(f) + '<span class="muted">' + f.constraints + '</span></td></tr>';
+    }).join('');
+
+    var rels = relationshipsFor(entityKey).map(function (item) {
+      var r = item.rel;
+      var other = r.source === entityKey ? r.target : r.source;
+      var arrow = r.self ? '↻' : (r.source === entityKey ? '→' : '←');
+      return '<li><strong>' + r.card + '</strong> ' + arrow + ' <strong>' + entities[other].name + '</strong>' +
+        '<br><span class="muted">' + r.description + '</span></li>';
+    }).join('');
+
+    panel.innerHTML =
+      '<div class="panel-kicker">Entity</div>' +
+      '<div class="panel-title">' + e.name + '</div>' +
+      '<p class="panel-purpose">' + e.purpose + '</p>' +
+      '<table class="panel-table">' + rows + '</table>' +
+      '<div class="panel-section"><h4>Relationships</h4><ul class="rel-list">' + rels + '</ul></div>' +
+      '<div class="panel-section"><h4>Rules</h4><ul class="rel-list">' +
+      e.rules.map(function (r) { return '<li>' + r + '</li>'; }).join('') +
+      '</ul></div>';
+  }
+
+  function renderRelationship(relId) {
+    var r = relationships[relId];
+    panel.innerHTML =
+      '<div class="panel-kicker">Relationship</div>' +
+      '<div class="panel-title">' + entities[r.source].name + ' ' + (r.self ? '↻' : '→') + ' ' + entities[r.target].name + '</div>' +
+      '<div class="rel-card"><div class="card-line">' + r.card + ' · ' + r.label + '</div>' +
+      '<div class="muted small">ON DELETE CASCADE</div></div>' +
+      '<p class="panel-purpose">' + r.description + '</p>' +
+      '<div class="panel-section"><h4>Foreign key</h4>' +
+      '<p class="small"><code>' + (r.self ? 'folder.parent_folder_id' : (r.source === 'quiz' ? 'quiz_id' : r.source + '_id')) + '</code>' +
+      (r.self ? ' → <code>folder.id</code>' : ' → <code>' + r.source + '.id</code>') + '</p></div>';
+  }
+
+  function renderSchema() {
+    var root = document.getElementById('schema-root');
+    root.innerHTML = Object.keys(entities).map(function (key) {
+      var e = entities[key];
+      var rows = e.fields.map(function (f) {
+        return '<tr><td class="col">' + f.name + '</td>' +
+          '<td class="type">' + f.type + '</td>' +
+          '<td>' + keyTag(f) + f.constraints + '</td></tr>';
+      }).join('');
+      return '<article class="schema-card">' +
+        '<div class="schema-head"><h3>' + e.name + '</h3><span class="table-name">' + key + '</span></div>' +
+        '<p class="muted small">' + e.purpose + '</p>' +
+        '<table class="fields"><thead><tr><th>Column</th><th>Type</th><th>Constraints</th></tr></thead><tbody>' +
+        rows + '</tbody></table></article>';
+    }).join('');
+  }
+
+  renderSchema();
+  renderWelcome();
+
+  var cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: [
+      { data: { id: 'folder', label: nodeLabel('folder'), nodeHeight: 125 }, position: { x: 140, y: 150 } },
+      { data: { id: 'quiz', label: nodeLabel('quiz'), nodeHeight: 155 }, position: { x: 480, y: 160 } },
+      { data: { id: 'question', label: nodeLabel('question'), nodeHeight: 228 }, position: { x: 820, y: 160 } },
+      { data: { id: 'attempt', label: nodeLabel('attempt'), nodeHeight: 180 }, position: { x: 480, y: 490 } },
+      { data: { id: 'option', label: nodeLabel('option'), nodeHeight: 140 }, position: { x: 820, y: 490 } },
+
+      { data: { id: 'folder-parent', source: 'folder', target: 'folder', label: 'parent · 0..1 : N' }, classes: 'self-loop' },
+      { data: { id: 'folder-quiz', source: 'folder', target: 'quiz', label: '1 : N' } },
+      { data: { id: 'quiz-question', source: 'quiz', target: 'question', label: '1 : N' } },
+      { data: { id: 'question-option', source: 'question', target: 'option', label: '1 : N' } },
+      { data: { id: 'quiz-attempt', source: 'quiz', target: 'attempt', label: '1 : N' } }
+    ],
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'shape': 'round-rectangle',
+          'background-color': '#ffffff',
+          'border-width': 1.5,
+          'border-color': '#d8d8d0',
+          'label': 'data(label)',
+          'font-family': 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+          'font-size': 10.5,
+          'line-height': 1.4,
+          'color': '#24241f',
+          'text-wrap': 'wrap',
+          'text-max-width': 205,
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'text-justification': 'left',
+          'padding': 14,
+          'width': 235,
+          'height': 'data(nodeHeight)',
+          'underlay-color': '#3a5a40',
+          'underlay-opacity': 0,
+          'underlay-padding': 7,
+          'transition-property': 'border-color, underlay-opacity',
+          'transition-duration': '120ms'
+        }
+      },
+      {
+        selector: 'node:selected',
+        style: {
+          'border-color': '#3a5a40',
+          'border-width': 2.5,
+          'underlay-opacity': 0.06
+        }
+      },
+      {
+        selector: 'node.hover',
+        style: {
+          'border-color': '#9aa89c'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 1.4,
+          'line-color': '#b9b9b0',
+          'target-arrow-color': '#b9b9b0',
+          'target-arrow-shape': 'triangle',
+          'arrow-scale': 0.8,
+          'curve-style': 'bezier',
+          'label': 'data(label)',
+          'font-size': 10,
+          'font-family': '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+          'color': '#77776f',
+          'text-background-color': '#fcfcfa',
+          'text-background-opacity': 0.92,
+          'text-background-padding': 3,
+          'text-rotation': 'none',
+          'transition-property': 'line-color, target-arrow-color, width',
+          'transition-duration': '120ms'
+        }
+      },
+      {
+        selector: 'edge.self-loop',
+        style: {
+          'loop-direction': '-45deg',
+          'loop-sweep': '120deg',
+          'control-point-step-size': 100,
+          'label': 'parent · 0..1 : N',
+          'text-margin-x': -70,
+          'text-margin-y': -55
+        }
+      },
+      {
+        selector: 'edge:selected',
+        style: {
+          'width': 2.4,
+          'line-color': '#3a5a40',
+          'target-arrow-color': '#3a5a40',
+          'color': '#3a5a40'
+        }
+      }
+    ],
+    layout: { name: 'preset', fit: true, padding: 45 },
+    minZoom: 0.35,
+    maxZoom: 2.5,
+    wheelSensitivity: 0.18
+  });
+
+  function selectEntity(node) {
+    cy.elements().unselect();
+    node.select();
+    renderEntity(node.id());
+  }
+
+  cy.on('tap', 'node', function (event) {
+    selectEntity(event.target);
+  });
+
+  cy.on('tap', 'edge', function (event) {
+    cy.elements().unselect();
+    event.target.select();
+    renderRelationship(event.target.id());
+  });
+
+  cy.on('tap', function (event) {
+    if (event.target === cy) {
+      cy.elements().unselect();
+      renderWelcome();
+    }
+  });
+
+  cy.on('mouseover', 'node', function (event) {
+    event.target.addClass('hover');
+    document.body.style.cursor = 'pointer';
+  });
+
+  cy.on('mouseout', 'node', function (event) {
+    event.target.removeClass('hover');
+    document.body.style.cursor = 'default';
+  });
+
+  document.getElementById('fit').addEventListener('click', function () {
+    cy.fit(undefined, 45);
+  });
+
+  document.getElementById('reset').addEventListener('click', function () {
+    cy.layout({ name: 'preset', fit: true, padding: 45 }).run();
+  });
+
+  document.getElementById('zoom-in').addEventListener('click', function () {
+    cy.zoom({ level: cy.zoom() * 1.2, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+  });
+
+  document.getElementById('zoom-out').addEventListener('click', function () {
+    cy.zoom({ level: cy.zoom() / 1.2, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+  });
+
+  document.getElementById('to-schema').addEventListener('click', function () {
+    document.getElementById('schema').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  window.addEventListener('resize', function () {
+    cy.resize();
+  });
+
+  selectEntity(cy.getElementById('folder'));
+})();
+</script>
+</body>
+</html>
