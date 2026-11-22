@@ -20,11 +20,11 @@ Last updated: 2026-11-22
 
 ## Test status
 
-Passing, 32 unit/widget tests + 1 integration test, 2026-11-22.
+Passing, 33 unit/widget tests + 1 integration test, 2026-11-22.
 
 ```
 flutter analyze                         -> No issues found
-flutter test                            -> All tests passed (32)
+flutter test                            -> All tests passed (33)
 flutter test integration_test -d windows -> All tests passed (1)
 ```
 
@@ -45,6 +45,7 @@ Newest first.
 | 2026-11-22 | Added result and history summary | Score, accuracy, duration and date |
 | 2026-11-22 | Added ViewModel tests and the key journey integration test | Verify state transitions and the end-to-end flow |
 | 2026-11-22 | Constrained content to 720 px on wide windows | Readable desktop layout without a separate design |
+| 2026-11-22 | Replaced the library refresh action with a light/dark theme switch | User request; Drift streams update live, so manual refresh is unnecessary |
 
 ## Open issues / decisions
 
@@ -52,6 +53,7 @@ Newest first.
 - Folder rows currently show the name only. Child counts need a `watchFolderSummaries` query; this is a small follow-up if the counts are wanted on the list.
 - The quiz detail eyebrow reads `QUIZ` because `QuizScreenModel` does not carry the folder name. The full breadcrumb is available on the folder screen.
 - Widget coverage for individual screens is provided by the key journey integration test plus the shared-widget test. Additional per-screen widget tests can be added without changing production code.
+- The light/dark mode switch is session-only; it resets to the system setting on app restart. Add persistence if needed.
 - The result screen shows “Saved to history” for historical attempts too; it is accurate but could be labelled “Attempt summary” when opened from history.
 - The app uses the Flutter 3.50 `material_ui` package instead of the deprecated `flutter/material.dart`.
 - `flutter_math_fork` renders the sample LaTeX and has a raw-text fallback if a formula fails.

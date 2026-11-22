@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:quiz_app/core/di/app_dependencies.dart';
 import 'package:quiz_app/core/theme/app_theme.dart';
+import 'package:quiz_app/core/theme/theme_controller.dart';
 import 'package:quiz_app/features/folder_browser/folder_browser_view.dart';
 import 'package:quiz_app/features/folder_browser/folder_browser_view_model.dart';
 
@@ -15,13 +16,16 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Quiz App',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
-      home: const FolderBrowserView(bundle: FolderBrowserBundle()),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppThemeController.mode,
+      builder: (context, themeMode, _) => MaterialApp(
+        title: 'Quiz App',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        themeMode: themeMode,
+        home: const FolderBrowserView(bundle: FolderBrowserBundle()),
+      ),
     );
   }
 }

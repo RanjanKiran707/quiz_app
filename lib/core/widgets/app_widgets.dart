@@ -2,6 +2,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:quiz_app/core/errors/failure.dart';
 import 'package:quiz_app/core/theme/app_theme.dart';
+import 'package:quiz_app/core/theme/theme_controller.dart';
 import 'package:quiz_app/core/utils/failure_messages.dart';
 
 class MathText extends StatelessWidget {
@@ -329,6 +330,42 @@ class PageBody extends StatelessWidget {
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,
       ),
+    );
+  }
+}
+
+class ThemeModeSwitch extends StatelessWidget {
+  const ThemeModeSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppThemeController.mode,
+      builder: (context, mode, _) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                size: 17,
+                color: context.appMuted,
+              ),
+              const SizedBox(width: 2),
+              Transform.scale(
+                scale: 0.78,
+                child: Switch(
+                  value: isDark,
+                  onChanged: AppThemeController.setDark,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

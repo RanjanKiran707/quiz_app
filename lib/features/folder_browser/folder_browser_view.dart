@@ -94,7 +94,7 @@ class _FolderBrowserViewState extends State<FolderBrowserView> {
       appBar: AppBar(
         leading: _isRoot ? null : const BackButton(),
         title: Text(title),
-        actions: actions,
+        actions: [...?actions, const ThemeModeSwitch()],
       ),
       body: body,
       floatingActionButton: floatingActionButton,
@@ -108,11 +108,6 @@ class _FolderBrowserViewState extends State<FolderBrowserView> {
     final isEmpty = folders.isEmpty && quizzes.isEmpty;
 
     final actions = <Widget>[
-      IconButton(
-        onPressed: ctrl.refresh,
-        icon: const Icon(Icons.refresh),
-        tooltip: 'Refresh',
-      ),
       if (folder != null)
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
@@ -140,10 +135,7 @@ class _FolderBrowserViewState extends State<FolderBrowserView> {
         child: const Icon(Icons.add),
       ),
       body: PageBody(
-        child: RefreshIndicator(
-          onRefresh: () async => ctrl.refresh(),
-          color: context.appAccent,
-          child: ListView(
+        child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
           children: [
             if (_isRoot)
@@ -219,7 +211,6 @@ class _FolderBrowserViewState extends State<FolderBrowserView> {
                 ),
               ),
           ],
-          ),
         ),
       ),
     );

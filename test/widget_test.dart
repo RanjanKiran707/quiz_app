@@ -2,6 +2,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:quiz_app/core/theme/app_theme.dart';
+import 'package:quiz_app/core/theme/theme_controller.dart';
 import 'package:quiz_app/core/widgets/app_widgets.dart';
 
 void main() {
@@ -27,5 +28,31 @@ void main() {
     expect(find.byType(MathText), findsOneWidget);
     expect(find.byType(Math), findsOneWidget);
     expect(find.text('Nothing here'), findsOneWidget);
+  });
+
+  testWidgets('theme switch toggles the app theme mode', (tester) async {
+    AppThemeController.mode.value = ThemeMode.light;
+
+    await tester.pumpWidget(
+      ValueListenableBuilder<ThemeMode>(
+        valueListenable: AppThemeController.mode,
+        builder: (context, mode, _) => MaterialApp(
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: mode,
+          home: Scaffold(
+            appBar: AppBar(
+              actions: const [ThemeModeSwitch()],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(AppThemeController.mode.value, ThemeMode.light);
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+
+    expect(AppThemeController.mode.value, ThemeMode.dark);
   });
 }
