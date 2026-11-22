@@ -46,6 +46,8 @@ Newest first.
 | 2026-11-22 | Added ViewModel tests and the key journey integration test | Verify state transitions and the end-to-end flow |
 | 2026-11-22 | Constrained content to 720 px on wide windows | Readable desktop layout without a separate design |
 | 2026-11-22 | Replaced the library refresh action with a light/dark theme switch | User request; Drift streams update live, so manual refresh is unnecessary |
+| 2026-11-22 | Renamed the visible app to Quiz on Android, iOS and Windows | User request; the package and bundle IDs stay `quiz_app` |
+| 2026-11-22 | Added three app icon concepts and a preview page | Preview only; the launcher icon stays the Flutter default until a concept is chosen |
 
 ## Open issues / decisions
 
@@ -54,6 +56,7 @@ Newest first.
 - The quiz detail eyebrow reads `QUIZ` because `QuizScreenModel` does not carry the folder name. The full breadcrumb is available on the folder screen.
 - Widget coverage for individual screens is provided by the key journey integration test plus the shared-widget test. Additional per-screen widget tests can be added without changing production code.
 - The light/dark mode switch is session-only; it resets to the system setting on app restart. Add persistence if needed.
+- The launcher icon is still the Flutter default. Three concepts are ready in `docs/icon_preview/`; the chosen one will be installed with `flutter_launcher_icons`.
 - The result screen shows “Saved to history” for historical attempts too; it is accurate but could be labelled “Attempt summary” when opened from history.
 - The app uses the Flutter 3.50 `material_ui` package instead of the deprecated `flutter/material.dart`.
 - `flutter_math_fork` renders the sample LaTeX and has a raw-text fallback if a formula fails.

@@ -19,7 +19,7 @@ class QuizApp extends StatelessWidget {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: AppThemeController.mode,
       builder: (context, themeMode, _) => MaterialApp(
-        title: 'Quiz App',
+        title: 'Quiz',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),

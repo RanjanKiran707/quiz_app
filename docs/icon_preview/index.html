@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz — App Icon Concepts</title>
+<style>
+  :root {
+    --bg: #f6f6f1;
+    --surface: #ffffff;
+    --ink: #1b1c18;
+    --muted: #6f7069;
+    --line: #e3e3da;
+    --green: #3a5a40;
+    --green-dark: #2e4934;
+    --sage: #a9c7af;
+    --cream: #f8f8f4;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1720px; margin: 0 auto; padding: 48px 40px 80px; }
+  header { max-width: 900px; }
+  .eyebrow { font-size: 11px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; color: var(--green); margin: 0 0 10px; }
+  h1 { font-size: clamp(34px, 4vw, 54px); line-height: 1.04; letter-spacing: -.035em; margin: 0 0 12px; }
+  .lede { font-size: 16px; color: var(--muted); max-width: 760px; margin: 0 0 18px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 5px 11px; }
+  .pill.green { background: #edf3ee; border-color: transparent; color: var(--green); font-weight: 650; }
+  section { margin-top: 42px; }
+  h2 { font-size: 21px; letter-spacing: -.015em; margin: 0 0 14px; }
+  h3 { font-size: 15px; margin: 0 0 5px; }
+  p { margin: 0; }
+  .concepts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .concept-card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; }
+  .concept-card.selected { border-color: var(--green); box-shadow: 0 0 0 3px #edf3ee; }
+  .concept-visual { background: var(--cream); border-radius: 16px; padding: 18px; display: grid; place-items: center; }
+  .concept-visual img { width: 100%; max-width: 512px; height: auto; border-radius: 22%; display: block; }
+  .concept-head { display: flex; align-items: baseline; gap: 9px; margin-top: 15px; }
+  .letter { width: 26px; height: 26px; border-radius: 8px; background: #edf3ee; color: var(--green); font-size: 12px; font-weight: 800; display: grid; place-items: center; flex: none; }
+  .concept-head h3 { font-size: 19px; letter-spacing: -.01em; }
+  .rationale { color: var(--muted); font-size: 13px; margin: 7px 0 14px; min-height: 38px; }
+  .choose {
+    appearance: none; border: 1px solid var(--green); border-radius: 11px; padding: 10px 14px;
+    background: var(--green); color: #fff; font-size: 13px; font-weight: 650; cursor: pointer;
+    font-family: inherit; margin-top: auto;
+  }
+  .choose:hover { background: var(--green-dark); }
+  .concept-card.selected .choose { background: #edf3ee; color: var(--green); }
+  .choice-status { min-height: 20px; margin-top: 9px; color: var(--green); font-size: 12px; font-weight: 600; text-align: center; }
+  .ladder, .masks, .backgrounds, .context { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+  .ladder-row, .mask-row, .bg-row, .context-row {
+    display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center;
+    padding: 18px 0; border-top: 1px solid var(--line);
+  }
+  .mask-row { grid-template-columns: 150px auto auto; align-items: start; }
+  .mask-row .row-label { padding-top: 4px; }
+  .mask-row .bg-items { padding-top: 0; }
+  .ladder-row:first-of-type, .mask-row:first-of-type, .bg-row:first-of-type, .context-row:first-of-type { border-top: 0; padding-top: 4px; }
+  .row-label { font-size: 12px; font-weight: 700; }
+  .row-label span { display: block; color: var(--muted); font-weight: 400; font-size: 11px; margin-top: 2px; }
+  .ladder-items { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+  .size-item { text-align: center; }
+  .size-item img { display: block; border-radius: 22%; margin: 0 auto 6px; }
+  .size-label { font-size: 10px; color: var(--muted); letter-spacing: .03em; }
+  .mask-items, .bg-items { display: flex; gap: 18px; flex-wrap: wrap; }
+  .mask-item, .bg-item { text-align: center; }
+  .mask { width: 126px; height: 126px; overflow: hidden; background: var(--cream); display: grid; place-items: center; }
+  .mask img, .bg-item img { width: 126px; height: 126px; display: block; }
+  .mask.circle { border-radius: 50%; }
+  .mask.rounded { border-radius: 22%; }
+  .mask.squircle { border-radius: 26%; }
+  .bg-item { padding: 10px; border-radius: 14px; }
+  .bg-item.white { background: #fff; border: 1px solid var(--line); }
+  .bg-item.dark { background: #111310; }
+  .bg-item.brand { background: var(--green); }
+  .bg-item .size-label { margin-top: 6px; }
+  .bg-item.dark .size-label { color: #d9ddd6; }
+  .bg-item.brand .size-label { color: #eaf1eb; }
+  .context-homes { display: flex; gap: 22px; flex-wrap: wrap; }
+  .phone { width: 238px; border-radius: 30px; padding: 14px 13px 18px; background: #efefe8; border: 1px solid var(--line); }
+  .phone.android { background: #e8eae3; }
+  .phone-label { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); text-align: center; margin-bottom: 10px; }
+  .home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px 8px; }
+  .app-cell { width: 44px; height: 44px; border-radius: 11px; background: #d8dbd1; position: relative; }
+  .app-cell:nth-child(4n+1) { background: #d9dfd6; }
+  .app-cell:nth-child(4n+2) { background: #e2ded2; }
+  .app-cell:nth-child(4n+3) { background: #d7dce3; }
+  .app-cell:nth-child(4n) { background: #e4dcd4; }
+  .app-cell.concept-app { background: transparent; width: 54px; height: 54px; margin: -5px; }
+  .app-cell.concept-app img { width: 54px; height: 54px; border-radius: 22%; display: block; }
+  .app-cell.concept-app::after { content: "Quiz"; position: absolute; left: 50%; bottom: -13px; transform: translateX(-50%); font-size: 7px; color: var(--muted); white-space: nowrap; }
+  .comparison { display: flex; align-items: flex-end; gap: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .comparison .item { text-align: center; }
+  .comparison img { width: 96px; height: 96px; border-radius: 22%; display: block; margin-bottom: 6px; }
+  .comparison .label { font-size: 10px; color: var(--muted); }
+  .notes-grid { display: grid; grid-template-columns: 1.1fr 1fr 1.2fr; gap: 18px; }
+  .note-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .note-card h3 { font-size: 13px; }
+  .note-card p, .note-card li { color: var(--muted); font-size: 12px; line-height: 1.55; }
+  .note-card ul { margin: 6px 0 0; padding-left: 17px; }
+  .swatches { display: flex; gap: 8px; margin-top: 10px; }
+  .swatch { flex: 1; height: 44px; border-radius: 9px; border: 1px solid rgba(0,0,0,.08); }
+  .swatch span { display: block; font-size: 8px; color: #fff; padding: 4px; }
+  footer { margin-top: 42px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 12px; }
+  @media (max-width: 1000px) {
+    .page { padding: 30px 20px 64px; }
+    .concepts { grid-template-columns: 1fr; }
+    .ladder-row, .mask-row, .bg-row, .context-row { grid-template-columns: 1fr; gap: 12px; }
+    .notes-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Quiz / App icon</p>
+    <h1>Three directions, one mark.</h1>
+    <p class="lede">
+      Minimal, local quiz practice: nested folders, JSON imports, timed attempts and answer review.
+      The palette is the app’s forest green and warm off-white.
+    </p>
+    <div class="meta">
+      <span class="pill green">Preview only · nothing installed</span>
+      <span class="pill">App name: Quiz</span>
+      <span class="pill">22 Nov 2026</span>
+      <span class="pill">1024 × 1024 masters</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Choose a direction</h2>
+    <div class="concepts">
+      <article class="concept-card" data-concept="A">
+        <div class="concept-visual"><img src="concepts/concept_a_q_1024.png" alt="Concept A: a rounded Q monogram"></div>
+        <div class="concept-head"><span class="letter">A</span><h3>Monogram Q</h3></div>
+        <p class="rationale">One rounded letter: the quiz identity at its simplest, with no metaphor to decode.</p>
+        <button class="choose" data-choose="A">Choose this icon</button>
+        <div class="choice-status"></div>
+      </article>
+      <article class="concept-card" data-concept="B">
+        <div class="concept-visual"><img src="concepts/concept_b_folder_check_1024.png" alt="Concept B: a folder holding a checked quiz card"></div>
+        <div class="concept-head"><span class="letter">B</span><h3>Folder check</h3></div>
+        <p class="rationale">A folder holding a checked quiz card: the product’s folders and completed attempts in one object.</p>
+        <button class="choose" data-choose="B">Choose this icon</button>
+        <div class="choice-status"></div>
+      </article>
+      <article class="concept-card" data-concept="C">
+        <div class="concept-visual"><img src="concepts/concept_c_nested_frames_1024.png" alt="Concept C: stepped nested rounded frames"></div>
+        <div class="concept-head"><span class="letter">C</span><h3>Nested frames</h3></div>
+        <p class="rationale">Stepped frames: nested folders, progress and layers in one geometric mark.</p>
+        <button class="choose" data-choose="C">Choose this icon</button>
+        <div class="choice-status"></div>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Size ladder</h2>
+    <div class="ladder">
+      <div class="ladder-row">
+        <div class="row-label">A · Monogram Q<span>Check the silhouette at small sizes</span></div>
+        <div class="ladder-items">
+          <div class="size-item"><img src="concepts/concept_a_q_1024.png" width="256" height="256" alt="A at 512 px"><span class="size-label">512 px</span></div>
+          <div class="size-item"><img src="concepts/concept_a_q_1024.png" width="192" height="192" alt="A at 192 px"><span class="size-label">192 px</span></div>
+          <div class="size-item"><img src="concepts/concept_a_q_1024.png" width="96" height="96" alt="A at 96 px"><span class="size-label">96 px</span></div>
+          <div class="size-item"><img src="concepts/concept_a_q_1024.png" width="48" height="48" alt="A at 48 px"><span class="size-label">48 px</span></div>
+        </div>
+      </div>
+      <div class="ladder-row">
+        <div class="row-label">B · Folder check<span>Check the silhouette at small sizes</span></div>
+        <div class="ladder-items">
+          <div class="size-item"><img src="concepts/concept_b_folder_check_1024.png" width="256" height="256" alt="B at 512 px"><span class="size-label">512 px</span></div>
+          <div class="size-item"><img src="concepts/concept_b_folder_check_1024.png" width="192" height="192" alt="B at 192 px"><span class="size-label">192 px</span></div>
+          <div class="size-item"><img src="concepts/concept_b_folder_check_1024.png" width="96" height="96" alt="B at 96 px"><span class="size-label">96 px</span></div>
+          <div class="size-item"><img src="concepts/concept_b_folder_check_1024.png" width="48" height="48" alt="B at 48 px"><span class="size-label">48 px</span></div>
+        </div>
+      </div>
+      <div class="ladder-row">
+        <div class="row-label">C · Nested frames<span>Check the silhouette at small sizes</span></div>
+        <div class="ladder-items">
+          <div class="size-item"><img src="concepts/concept_c_nested_frames_1024.png" width="256" height="256" alt="C at 512 px"><span class="size-label">512 px</span></div>
+          <div class="size-item"><img src="concepts/concept_c_nested_frames_1024.png" width="192" height="192" alt="C at 192 px"><span class="size-label">192 px</span></div>
+          <div class="size-item"><img src="concepts/concept_c_nested_frames_1024.png" width="96" height="96" alt="C at 96 px"><span class="size-label">96 px</span></div>
+          <div class="size-item"><img src="concepts/concept_c_nested_frames_1024.png" width="48" height="48" alt="C at 48 px"><span class="size-label">48 px</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mask and background checks</h2>
+    <div class="masks">
+      <div class="mask-row">
+        <div class="row-label">A · Monogram Q</div>
+        <div class="mask-items">
+          <div class="mask-item"><div class="mask circle"><img src="concepts/concept_a_q_1024.png" alt="A circle mask"></div><div class="size-label">Circle</div></div>
+          <div class="mask-item"><div class="mask rounded"><img src="concepts/concept_a_q_1024.png" alt="A rounded square mask"></div><div class="size-label">Rounded 22%</div></div>
+          <div class="mask-item"><div class="mask squircle"><img src="concepts/concept_a_q_1024.png" alt="A squircle mask"></div><div class="size-label">Squircle</div></div>
+        </div>
+        <div class="bg-items">
+          <div class="bg-item white"><img src="concepts/concept_a_q_1024.png" alt="A on white"><div class="size-label">White</div></div>
+          <div class="bg-item dark"><img src="concepts/concept_a_q_1024.png" alt="A on dark"><div class="size-label">Near-black</div></div>
+          <div class="bg-item brand"><img src="concepts/concept_a_q_1024.png" alt="A on green"><div class="size-label">Brand</div></div>
+        </div>
+      </div>
+      <div class="mask-row">
+        <div class="row-label">B · Folder check</div>
+        <div class="mask-items">
+          <div class="mask-item"><div class="mask circle"><img src="concepts/concept_b_folder_check_1024.png" alt="B circle mask"></div><div class="size-label">Circle</div></div>
+          <div class="mask-item"><div class="mask rounded"><img src="concepts/concept_b_folder_check_1024.png" alt="B rounded square mask"></div><div class="size-label">Rounded 22%</div></div>
+          <div class="mask-item"><div class="mask squircle"><img src="concepts/concept_b_folder_check_1024.png" alt="B squircle mask"></div><div class="size-label">Squircle</div></div>
+        </div>
+        <div class="bg-items">
+          <div class="bg-item white"><img src="concepts/concept_b_folder_check_1024.png" alt="B on white"><div class="size-label">White</div></div>
+          <div class="bg-item dark"><img src="concepts/concept_b_folder_check_1024.png" alt="B on dark"><div class="size-label">Near-black</div></div>
+          <div class="bg-item brand"><img src="concepts/concept_b_folder_check_1024.png" alt="B on green"><div class="size-label">Brand</div></div>
+        </div>
+      </div>
+      <div class="mask-row">
+        <div class="row-label">C · Nested frames</div>
+        <div class="mask-items">
+          <div class="mask-item"><div class="mask circle"><img src="concepts/concept_c_nested_frames_1024.png" alt="C circle mask"></div><div class="size-label">Circle</div></div>
+          <div class="mask-item"><div class="mask rounded"><img src="concepts/concept_c_nested_frames_1024.png" alt="C rounded square mask"></div><div class="size-label">Rounded 22%</div></div>
+          <div class="mask-item"><div class="mask squircle"><img src="concepts/concept_c_nested_frames_1024.png" alt="C squircle mask"></div><div class="size-label">Squircle</div></div>
+        </div>
+        <div class="bg-items">
+          <div class="bg-item white"><img src="concepts/concept_c_nested_frames_1024.png" alt="C on white"><div class="size-label">White</div></div>
+          <div class="bg-item dark"><img src="concepts/concept_c_nested_frames_1024.png" alt="C on dark"><div class="size-label">Near-black</div></div>
+          <div class="bg-item brand"><img src="concepts/concept_c_nested_frames_1024.png" alt="C on green"><div class="size-label">Brand</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>In context</h2>
+    <div class="context">
+      <div class="context-row">
+        <div class="row-label">A · Monogram Q</div>
+        <div class="context-homes">
+          <div class="phone"><div class="phone-label">iOS home screen</div><div class="home-grid" data-grid="A"></div></div>
+          <div class="phone android"><div class="phone-label">Android home screen</div><div class="home-grid" data-grid="A"></div></div>
+        </div>
+      </div>
+      <div class="context-row">
+        <div class="row-label">B · Folder check</div>
+        <div class="context-homes">
+          <div class="phone"><div class="phone-label">iOS home screen</div><div class="home-grid" data-grid="B"></div></div>
+          <div class="phone android"><div class="phone-label">Android home screen</div><div class="home-grid" data-grid="B"></div></div>
+        </div>
+      </div>
+      <div class="context-row">
+        <div class="row-label">C · Nested frames</div>
+        <div class="context-homes">
+          <div class="phone"><div class="phone-label">iOS home screen</div><div class="home-grid" data-grid="C"></div></div>
+          <div class="phone android"><div class="phone-label">Android home screen</div><div class="home-grid" data-grid="C"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Comparison at 96 px</h2>
+    <div class="comparison">
+      <div class="item"><img src="concepts/concept_a_q_1024.png" alt="A at 96 px"><div class="label">A · Monogram Q</div></div>
+      <div class="item"><img src="concepts/concept_b_folder_check_1024.png" alt="B at 96 px"><div class="label">B · Folder check</div></div>
+      <div class="item"><img src="concepts/concept_c_nested_frames_1024.png" alt="C at 96 px"><div class="label">C · Nested frames</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <div class="notes-grid">
+      <div class="note-card">
+        <h3>Palette</h3>
+        <p>The three concepts stay in the app’s family so the choice is about the idea, not the colour.</p>
+        <div class="swatches">
+          <div class="swatch" style="background:#3A5A40"><span>#3A5A40</span></div>
+          <div class="swatch" style="background:#A9C7AF"><span style="color:#1B1C18">#A9C7AF</span></div>
+          <div class="swatch" style="background:#F8F8F4"><span style="color:#1B1C18">#F8F8F4</span></div>
+        </div>
+      </div>
+      <div class="note-card">
+        <h3>Safe zone</h3>
+        <ul>
+          <li>Mark centred with ~22% padding.</li>
+          <li>Android adaptive foreground keeps the mark inside the central 66%.</li>
+          <li>Masks above are previews; the installed iOS icon is unmasked.</li>
+        </ul>
+      </div>
+      <div class="note-card">
+        <h3>Known limitations</h3>
+        <ul>
+          <li>This page is a preview; no launcher icon is installed.</li>
+          <li>The selected master will be exported for Android, iOS and Windows.</li>
+          <li>Small-size checks use browser downscaling of the 1024 px master.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Preview only. Reply with <strong>A</strong>, <strong>B</strong> or <strong>C</strong> to choose; the selected concept is recorded in <code>brief.md</code> and installed only then.
+  </footer>
+</div>
+
+<script>
+  const iconById = {
+    A: 'concepts/concept_a_q_1024.png',
+    B: 'concepts/concept_b_folder_check_1024.png',
+    C: 'concepts/concept_c_nested_frames_1024.png'
+  };
+
+  function buildHomeGrid(grid, concept) {
+    const total = 16;
+    const conceptIndex = 5;
+    for (let i = 0; i < total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'app-cell';
+      if (i === conceptIndex) {
+        cell.classList.add('concept-app');
+        const img = document.createElement('img');
+        img.src = iconById[concept];
+        img.alt = concept + ' app icon on a home screen';
+        cell.appendChild(img);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  document.querySelectorAll('[data-grid]').forEach((grid) => {
+    buildHomeGrid(grid, grid.dataset.grid);
+  });
+
+  const cards = Array.from(document.querySelectorAll('.concept-card'));
+  const statuses = Array.from(document.querySelectorAll('.choice-status'));
+  const saved = localStorage.getItem('quiz_icon_choice');
+  if (saved && iconById[saved]) {
+    const card = document.querySelector('[data-concept="' + saved + '"]');
+    if (card) {
+      card.classList.add('selected');
+      const status = card.querySelector('.choice-status');
+      if (status) status.textContent = 'Selected in this review — reply with ' + saved + ' to confirm.';
+    }
+  }
+
+  document.querySelectorAll('[data-choose]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const concept = button.dataset.choose;
+      cards.forEach((card) => {
+        card.classList.toggle('selected', card.dataset.concept === concept);
+      });
+      statuses.forEach((status) => { status.textContent = ''; });
+      const card = document.querySelector('[data-concept="' + concept + '"]');
+      const status = card.querySelector('.choice-status');
+      if (status) status.textContent = 'Selected in this review — reply with ' + concept + ' to confirm.';
+      localStorage.setItem('quiz_icon_choice', concept);
+    });
+  });
+</script>
+</body>
+</html>
