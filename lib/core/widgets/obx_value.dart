@@ -1,6 +1,5 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ObxValue<T> extends StatelessWidget {
   final ValueListenable<T> listenable;

@@ -6,7 +6,7 @@ abstract interface class QuizRepositoryInterface {
 
   Future<Result<QuizDetailModel?>> getQuiz(String id);
 
-  Future<Result<void>> importQuizzes(
+  Future<Result<List<String>>> importQuizzes(
     String folderId,
     List<QuizImportModel> quizzes,
   );

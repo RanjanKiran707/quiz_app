@@ -1,27 +1,27 @@
-// ignore_for_file: deprecated_member_use
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:quiz_app/core/di/app_dependencies.dart';
+import 'package:quiz_app/core/theme/app_theme.dart';
+import 'package:quiz_app/features/folder_browser/folder_browser_view.dart';
+import 'package:quiz_app/features/folder_browser/folder_browser_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppDependencies.init();
-  runApp(const MyApp());
+  runApp(const QuizApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class QuizApp extends StatelessWidget {
+  const QuizApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quiz App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3A5A40)),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(child: Text('Quiz App')),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+      home: const FolderBrowserView(bundle: FolderBrowserBundle()),
     );
   }
 }

@@ -101,16 +101,18 @@ class QuizRepository implements QuizRepositoryInterface {
   }
 
   @override
-  Future<Result<void>> importQuizzes(
+  Future<Result<List<String>>> importQuizzes(
     String folderId,
     List<QuizImportModel> quizzes,
   ) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
+      final importedIds = <String>[];
 
       await _db.transaction(() async {
         for (final quiz in quizzes) {
           final quizId = _uuid.v4();
+          importedIds.add(quizId);
           await _db.into(_db.quizzes).insert(
                 QuizModel(
                   id: quizId,
@@ -155,7 +157,7 @@ class QuizRepository implements QuizRepositoryInterface {
         }
       });
 
-      return const Ok(null);
+      return Ok(importedIds);
     } catch (error) {
       return Err(StorageFailure(error.toString()));
     }

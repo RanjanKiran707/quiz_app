@@ -61,12 +61,17 @@ class AppDependencies {
   });
 
   static Future<void> init() async {
-    final database = AppDatabase(driftDatabase(name: 'quiz_app'));
+    instance = AppDependencies.withDatabase(
+      AppDatabase(driftDatabase(name: 'quiz_app')),
+    );
+  }
+
+  factory AppDependencies.withDatabase(AppDatabase database) {
     final folderRepository = FolderRepository(database);
     final quizRepository = QuizRepository(database);
     final attemptRepository = AttemptRepository(database);
 
-    instance = AppDependencies._(
+    return AppDependencies._(
       database: database,
       folderRepository: folderRepository,
       quizRepository: quizRepository,

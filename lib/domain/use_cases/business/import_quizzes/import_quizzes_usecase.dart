@@ -9,7 +9,7 @@ class ImportQuizzesUsecase {
 
   final QuizRepositoryInterface _quizzes;
 
-  Future<Result<void>> call(ImportQuizzesArgumentModel arguments) async {
+  Future<Result<List<String>>> call(ImportQuizzesArgumentModel arguments) async {
     if (arguments.quizzes.isEmpty) {
       return const Err(ValidationFailure('no_quizzes'));
     }
