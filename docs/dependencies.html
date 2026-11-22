@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz App — Dependency Plan</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --ink: #1c1c1a;
+    --muted: #6b6b66;
+    --line: #e4e4df;
+    --accent: #3a5a40;
+    --accent-soft: #eef3ef;
+    --warn: #8a5a00;
+    --warn-soft: #fdf5e6;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1040px; margin: 0 auto; padding: 56px 24px 96px; }
+  header { margin-bottom: 36px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: 17px; max-width: 720px; margin: 0 0 18px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    display: inline-block; padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface);
+    font-size: 12.5px; color: var(--muted);
+  }
+  .pill.status { background: var(--warn-soft); color: var(--warn); border-color: #f0dfbc; font-weight: 600; }
+  section { margin-top: 36px; }
+  h2 { font-size: 20px; margin: 0 0 14px; letter-spacing: -.01em; }
+  h3 { font-size: 15px; margin: 24px 0 10px; }
+  p { margin: 0 0 12px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 22px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .stat .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .stat .value { font-size: 16px; font-weight: 650; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  th { background: #fafaf8; font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.8px; }
+  code { background: #f1f1ee; padding: 2px 5px; border-radius: 5px; }
+  .pkg { font-weight: 650; white-space: nowrap; }
+  .ver { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  .purpose { color: var(--ink); }
+  .why { color: var(--muted); font-size: 13px; }
+  pre {
+    background: #1f2320; color: #e8ece8; padding: 16px 18px; border-radius: 12px;
+    overflow-x: auto; margin: 10px 0 0; font-size: 13px; line-height: 1.6;
+  }
+  .note {
+    border-left: 3px solid var(--accent); background: var(--accent-soft);
+    padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 14px 0;
+    font-size: 14px;
+  }
+  .note.warn { border-left-color: #d29a2c; background: var(--warn-soft); }
+  ul { margin: 0 0 12px; padding-left: 20px; }
+  li { margin: 5px 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #f1f1ee; color: var(--muted); font-size: 11.5px; font-weight: 600; }
+  .tag.dev { background: #eef1f8; color: #3b4f7a; }
+  .tag.runtime { background: var(--accent-soft); color: var(--accent); }
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  @media (max-width: 700px) {
+    .page { padding: 32px 16px 64px; }
+    .two { grid-template-columns: 1fr; }
+    th:nth-child(2), td:nth-child(2) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Quiz App / Setup</p>
+    <h1>Dependency plan</h1>
+    <p class="lede">
+      Every third-party package the MVP needs, why it is needed, and what will not be added.
+      Nothing is installed until this list is approved.
+    </p>
+    <div class="meta">
+      <span class="pill status">Awaiting approval</span>
+      <span class="pill">22 Nov 2026</span>
+      <span class="pill">Flutter 3.35.7</span>
+      <span class="pill">Dart 3.9.2</span>
+      <span class="pill">Android · iOS · Windows</span>
+    </div>
+  </header>
+
+  <section class="grid" aria-label="Summary">
+    <div class="stat"><div class="label">Runtime packages</div><div class="value">6</div></div>
+    <div class="stat"><div class="label">Dev packages</div><div class="value">5</div></div>
+    <div class="stat"><div class="label">Network packages</div><div class="value">0</div></div>
+    <div class="stat"><div class="label">State-management packages</div><div class="value">0</div></div>
+  </section>
+
+  <section>
+    <h2>Runtime dependencies</h2>
+    <table>
+      <thead>
+        <tr><th>Package</th><th>Version</th><th>Purpose</th><th>Why this one</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pkg">drift</td>
+          <td class="ver">2.32.1</td>
+          <td class="purpose">Typed SQLite database: tables, migrations, foreign keys and reactive <code>watch</code> queries.</td>
+          <td class="why">Folders, quizzes, questions and attempts are relational and must update live. Drift gives typed queries, cascades and streams without hand-written SQL plumbing.</td>
+        </tr>
+        <tr>
+          <td class="pkg">drift_flutter</td>
+          <td class="ver">0.3.0</td>
+          <td class="purpose">Opens the Drift database on Android, iOS and desktop with the correct app-data path and SQLite libraries.</td>
+          <td class="why">Removes platform-specific database setup from <code>main()</code> and keeps the data layer portable.</td>
+        </tr>
+        <tr>
+          <td class="pkg">file_picker</td>
+          <td class="ver">11.0.3</td>
+          <td class="purpose">Native file picker used to choose the quiz <code>.json</code> file.</td>
+          <td class="why">The PRD requires file-based import. It covers Android, iOS and Windows with one API.</td>
+        </tr>
+        <tr>
+          <td class="pkg">intl</td>
+          <td class="ver">0.20.3</td>
+          <td class="purpose">Formats attempt dates, times and durations in the history list.</td>
+          <td class="why">Small, official Dart package; avoids hand-written date formatting and locale mistakes.</td>
+        </tr>
+        <tr>
+          <td class="pkg">uuid</td>
+          <td class="ver">4.6.0</td>
+          <td class="purpose">Generates stable string IDs for folders, quizzes, questions, options and attempts.</td>
+          <td class="why">The architecture requires stable IDs. UUIDs avoid collisions and keep import and navigation independent of auto-increment counters.</td>
+        </tr>
+        <tr>
+          <td class="pkg">flutter_math_fork</td>
+          <td class="ver">0.7.4</td>
+          <td class="purpose">Renders inline TeX / LaTeX in question prompts and options, e.g. <code>\(2^{29}\)</code>, <code>\times</code>.</td>
+          <td class="why">The quiz content is mathematical. The package is a maintained pure-Dart fork of <code>flutter_math</code>, with the widest KaTeX compatibility.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Dev dependencies</h2>
+    <table>
+      <thead>
+        <tr><th>Package</th><th>Version</th><th>Purpose</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pkg">drift_dev</td>
+          <td class="ver">2.32.1</td>
+          <td class="purpose">Generates the Drift table, query and database code.</td>
+          <td class="why">Must match the <code>drift</code> runtime version.</td>
+        </tr>
+        <tr>
+          <td class="pkg">build_runner</td>
+          <td class="ver">2.15.1</td>
+          <td class="purpose">Runs <code>drift_dev</code> code generation.</td>
+          <td class="why">Standard build tool; generated files are committed so the app builds without an extra step.</td>
+        </tr>
+        <tr>
+          <td class="pkg">integration_test</td>
+          <td class="ver">SDK</td>
+          <td class="purpose">End-to-end tests for the main journey on a device or host.</td>
+          <td class="why">Ships with Flutter; no third-party test runner.</td>
+        </tr>
+        <tr>
+          <td class="pkg">flutter_lints</td>
+          <td class="ver">Template</td>
+          <td class="purpose">Recommended Flutter lint set.</td>
+          <td class="why">Included by <code>flutter create</code> and kept for <code>flutter analyze</code>.</td>
+        </tr>
+        <tr>
+          <td class="pkg">mocktail</td>
+          <td class="ver">1.0.5</td>
+          <td class="purpose">Optional test doubles where a hand-written fake would be longer.</td>
+          <td class="why">The architecture prefers hand-written fakes; mocktail is only for the few interfaces that are awkward to fake.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Deliberately not added</h2>
+    <div class="card">
+      <table style="border:0; border-radius:0;">
+        <thead>
+          <tr><th>Package / area</th><th>Decision</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="pkg">provider · riverpod · bloc · getx</td><td class="why">Not needed. The architecture uses <code>ValueNotifier</code>, <code>ViewState</code> and constructor injection.</td></tr>
+          <tr><td class="pkg">go_router</td><td class="why">Not needed. The app has a simple folder → quiz → attempt stack; <code>Navigator</code> is enough.</td></tr>
+          <tr><td class="pkg">dio · http</td><td class="why">The app is fully offline. No network calls at runtime.</td></tr>
+          <tr><td class="pkg">sqflite · hive · isar</td><td class="why">Drift is the single storage choice; adding another database would duplicate persistence.</td></tr>
+          <tr><td class="pkg">shared_preferences</td><td class="why">Theme follows the system; all persistent data lives in the database.</td></tr>
+          <tr><td class="pkg">freezed · json_serializable</td><td class="why">Models are small and hand-written; no second code generator beyond Drift.</td></tr>
+          <tr><td class="pkg">path_provider</td><td class="why"><code>drift_flutter</code> already handles paths.</td></tr>
+          <tr><td class="pkg">url_launcher · share_plus</td><td class="why">Sharing and external links are out of scope for the MVP.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Version compatibility</h2>
+    <p>
+      This machine runs <strong>Flutter 3.35.7 / Dart 3.9.2</strong>. The newest pub releases of
+      <code>drift</code> (2.35.4), <code>drift_flutter</code> (0.3.1), <code>file_picker</code> (13.4.1)
+      and <code>build_runner</code> (2.17.1) require Dart 3.10 or newer, so <code>pub</code> will resolve
+      the newest compatible versions listed above. That is the recommended path.
+    </p>
+    <div class="note">
+      <strong>Optional:</strong> run <code>flutter upgrade</code> before setup to use the very latest
+      package versions. It adds time and a small compatibility risk, and is not required by the MVP.
+    </div>
+  </section>
+
+  <section>
+    <h2>Install commands</h2>
+    <pre>flutter pub add drift drift_flutter file_picker intl uuid flutter_math_fork
+flutter pub add dev:drift_dev dev:build_runner dev:mocktail
+flutter pub add dev:integration_test --sdk=flutter
+dart run build_runner build --delete-conflicting-outputs
+flutter analyze</pre>
+    <p class="small muted" style="margin-top:12px;">
+      Versions are resolved by <code>pub</code> for Dart 3.9.2. The resolved versions are recorded in
+      <code>pubspec.lock</code> and committed.
+    </p>
+  </section>
+
+  <section>
+    <h2>Risks and fallbacks</h2>
+    <div class="two">
+      <div class="card">
+        <h3 style="margin-top:0;">flutter_math_fork maintenance</h3>
+        <p class="small muted" style="margin-bottom:0;">
+          Last published May 2025; Apache-2.0; pulls <code>provider</code> and <code>flutter_svg</code>
+          transitively (not used by app code). It is still the standard pure-Dart TeX renderer.
+          Fallback: a small Unicode formatter for the limited TeX subset in the quiz files.
+        </p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Drift code generation</h3>
+        <p class="small muted" style="margin-bottom:0;">
+          Adds a build step. Generated <code>*.g.dart</code> files are committed, so a fresh clone and
+          <code>flutter run</code> work without running <code>build_runner</code>. CI and tests verify
+          the generated code is current.
+        </p>
+      </div>
+    </div>
+    <div class="note warn">
+      <strong>Math fallback:</strong> if <code>flutter_math_fork</code> does not compile on this Flutter
+      version, the app will ship the Unicode formatter instead of blocking the whole setup. This is the
+      only package with a pre-approved fallback.
+    </div>
+  </section>
+
+  <footer>
+    Source: <code>docs/product_spec.md</code> · Workflow: <code>Flutter/flutter_initial_setup.md</code>
+  </footer>
+
+</div>
+</body>
+</html>
