@@ -213,7 +213,7 @@
         <tbody>
           <tr><td class="pkg">provider · riverpod · bloc · getx</td><td class="why">Not needed. The architecture uses <code>ValueNotifier</code>, <code>ViewState</code> and constructor injection.</td></tr>
           <tr><td class="pkg">go_router</td><td class="why">Not needed. The app has a simple folder → quiz → attempt stack; <code>Navigator</code> is enough.</td></tr>
-          <tr><td class="pkg">dio · http</td><td class="why">The app is fully offline. No network calls at runtime.</td></tr>
+          <tr><td class="pkg">dio · http</td><td class="why">The app is local-only; repositories read and write Drift directly. No HTTP client, API client or fake server.</td></tr>
           <tr><td class="pkg">sqflite · hive · isar</td><td class="why">Drift is the single storage choice; adding another database would duplicate persistence.</td></tr>
           <tr><td class="pkg">shared_preferences</td><td class="why">Theme follows the system; all persistent data lives in the database.</td></tr>
           <tr><td class="pkg">freezed · json_serializable</td><td class="why">Models are small and hand-written; no second code generator beyond Drift.</td></tr>

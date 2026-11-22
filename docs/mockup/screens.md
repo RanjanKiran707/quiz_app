@@ -6,39 +6,40 @@
 **Theme:** light and dark, toggled from the developer toolbar
 **Device:** 390 × 844 phone frame on desktop; full viewport below 560 px
 
-The mockup is a single self-contained page. All data goes through a fake HTTP layer backed by an in-memory database persisted to `localStorage`.
+The mockup is a self-contained page. It has **no HTTP layer and no fake server**. Screens call a local repository facade backed by an in-memory database persisted to `localStorage`. The repository methods mirror the future Drift repositories, so the mapping to Phase 1 code is direct.
+
+> **Intentional deviation:** `Flutter/flutter_mockup_generator.md` describes a fake HTTP layer. This project is fully local, so the mockup calls the repository directly instead. Screens and states are unchanged.
 
 ---
 
 ## 1. Screen inventory
 
-| # | Screen | Route | Purpose | States | Endpoints |
+| # | Screen | Route | Purpose | States | Repository calls |
 |---|---|---|---|---|---|
-| 1 | All folders (root) | `#/` | Browse top-level folders, create a folder | loading, empty, error, offline, loaded | `GET /api/folders/root/contents` |
-| 2 | Folder | `#/folders/:folderId` | Browse sub-folders and quizzes in a folder | loading, empty, error, offline, loaded | `GET /api/folders/:id/contents`, `GET /api/folders/:id/delete-preview` |
-| 3 | Quiz detail | `#/quizzes/:quizId` | Read quiz metadata, start an attempt, view history | loading, empty history, error, offline, loaded | `GET /api/quizzes/:id`, `DELETE /api/quizzes/:id` |
-| 4 | Attempt — pre-start | `#/quizzes/:quizId/attempt` | Explain the rules; hold questions until Start | loading, idle, error, offline | `GET /api/quizzes/:id` |
-| 5 | Attempt — running | same route, in-page state | Answer questions with a live timer and End control | running, answered progress, end confirmation, discard confirmation, offline write block | `POST /api/attempts` |
-| 6 | Result (fresh attempt) | `#/quizzes/:quizId/result/:attemptId` | Show score, accuracy, time and date after End | loading, loaded, error, offline | `GET /api/attempts/:id` |
-| 7 | Attempt summary | `#/attempts/:attemptId` | Read a past attempt from history | loading, loaded, error, offline | `GET /api/attempts/:id` |
-| 8 | Import | `#/import?folder=:folderId` | Pick one or more JSON files, validate, preview, import | idle/empty, reading, partial valid, all invalid, importing, success, error, offline | `GET /api/folders/:id/contents`, `POST /api/quizzes/import` |
+| 1 | All folders (root) | `#/` | Browse top-level folders, create a folder | loading, empty, error, loaded | `folderContents('root')` |
+| 2 | Folder | `#/folders/:folderId` | Browse sub-folders and quizzes in a folder | loading, empty, error, loaded | `folderContents(id)`, `folderDeletePreview(id)` |
+| 3 | Quiz detail | `#/quizzes/:quizId` | Read quiz metadata, start an attempt, view history | loading, empty history, error, loaded | `quiz(id)`, `deleteQuiz(id)` |
+| 4 | Attempt — pre-start | `#/quizzes/:quizId/attempt` | Explain the rules; hold questions until Start | loading, idle, error | `quiz(id)` |
+| 5 | Attempt — running | same route, in-page state | Answer questions with a live timer and End control | running, answered progress, end confirmation, discard confirmation, storage error | `saveAttempt(payload)` |
+| 6 | Result (fresh attempt) | `#/quizzes/:quizId/result/:attemptId` | Show score, accuracy, time and date after End | loading, loaded, error | `attempt(id)` |
+| 7 | Attempt summary | `#/attempts/:attemptId` | Read a past attempt from history | loading, loaded, error | `attempt(id)` |
+| 8 | Import | `#/import?folder=:folderId` | Pick one or more JSON files, validate, preview, import | idle/empty, reading, partial valid, all invalid, importing, success, error | `folderContents(id)`, `importQuizzes(folderId, quizzes)` |
 | 9 | Not found | any unknown route, e.g. `#/does-not-exist` | Friendly dead-end with a way back | loaded | — |
 
 ### Sheets, dialogs and transient UI
 
 | # | Overlay | Opened from | States |
 |---|---|---|---|
-| 10 | Add menu | FAB on Library or Folder | idle; offers New folder, and Import quizzes inside a folder |
-| 11 | New folder | Add menu or empty state | idle, validation error, saving, server conflict (duplicate name), error |
+| 10 | Add menu | FAB on All folders or Folder | idle; offers New folder, and Import quizzes inside a folder |
+| 11 | New folder | Add menu or empty state | idle, validation error, saving, duplicate name, storage error |
 | 12 | Folder actions | Row more button or folder app bar | idle; Rename folder, Delete folder |
-| 13 | Rename folder | Folder actions | idle, validation error, saving, server conflict, error |
-| 14 | Delete folder | Folder actions | loading preview, counts, deleting, error |
+| 13 | Rename folder | Folder actions | idle, validation error, saving, duplicate name, storage error |
+| 14 | Delete folder | Folder actions | loading preview, counts, deleting, storage error |
 | 15 | Quiz actions | Quiz row more button or quiz app bar | idle; Delete quiz |
-| 16 | Delete quiz | Quiz actions | counts, deleting, error |
-| 17 | End attempt | End button (app bar or footer) | answered/unanswered summary, saving, error |
+| 16 | Delete quiz | Quiz actions | counts, deleting, storage error |
+| 17 | End attempt | End button (app bar or footer) | answered/unanswered summary, saving, storage error |
 | 18 | Discard attempt | Close button, back gesture, browser back | confirmation |
 | 19 | Toast | Any completed mutation | success or error, auto-dismiss |
-| 20 | Offline banner | Any data screen while offline | persistent, Retry |
 
 ---
 
@@ -59,43 +60,45 @@ Navigation uses hash routes, so the browser back button and deep links work. Bac
 
 ---
 
-## 3. Endpoint contract
+## 3. Repository contract
 
-All requests go through the overridden `window.fetch`; nothing reaches the network. Success responses are `{ data: ... }`; failures are `{ error: { code, message } }` with real status codes.
+Screens never read the mock database directly. They call `repo.*`; each method returns a Promise, applies the simulated query delay, and may throw `DataError { code, message }`. The UI renders the message and offers a retry where appropriate.
 
-| Method | Path | Purpose | Success | Notes |
-|---|---|---|---|---|
-| `GET` | `/api/folders/:id/contents` | Folder metadata, breadcrumb, direct folders and quizzes, library stats | `200` | `id` is `root` for the library |
-| `GET` | `/api/folders/:id/delete-preview` | Counts for the delete confirmation | `200` | Recursive sub-folders, quizzes and attempts |
-| `POST` | `/api/folders` | Create a folder | `201` | 422 for empty/long names; 409 for duplicate siblings |
-| `PATCH` | `/api/folders/:id` | Rename a folder | `200` | Same validation as create |
-| `DELETE` | `/api/folders/:id` | Delete a folder and its subtree | `204` | Cascades to quizzes, questions, options and attempts |
-| `GET` | `/api/quizzes/:id` | Quiz, folder, ordered questions/options, attempts | `200` | 404 if the quiz is gone |
-| `POST` | `/api/quizzes/import` | Insert canonical quizzes into a folder | `201` | Accepts parsed quizzes; the client validates files |
-| `DELETE` | `/api/quizzes/:id` | Delete a quiz and its history | `204` | Cascades |
-| `POST` | `/api/attempts` | Save a completed attempt | `201` | Computes score and max score from answers |
-| `GET` | `/api/attempts/:id` | Attempt summary and its quiz | `200` | 404 if the attempt is gone |
+| Method | Purpose | Returns |
+|---|---|---|
+| `folderContents(id)` | Folder metadata, breadcrumb, direct folders/quizzes, library stats | `{ folder, path, folders, quizzes, stats }` |
+| `folderDeletePreview(id)` | Counts for the delete confirmation | `{ folder, folders, quizzes, attempts, questions }` |
+| `createFolder(parentId, name)` | Create a folder | created folder summary |
+| `renameFolder(id, name)` | Rename a folder | updated folder summary |
+| `deleteFolder(id)` | Delete a folder and its subtree | `null` (cascades in the mock database) |
+| `quiz(id)` | Quiz, folder, ordered questions/options, attempts | `{ quiz, folder, questions, attempts }` |
+| `importQuizzes(folderId, quizzes)` | Insert canonical quizzes into a folder | `{ imported, skipped }` |
+| `deleteQuiz(id)` | Delete a quiz and its history | `null` |
+| `saveAttempt(payload)` | Save a completed attempt and compute its score | `{ attempt, quiz }` |
+| `attempt(id)` | Attempt summary and its quiz | `{ attempt, quiz }` |
 
-Latency is 350 ms by default and can be set to 0, 150, 350 or 700 ms. Error rate can be set to 0%, 10%, 30% or 100%. Offline mode returns `503` for every call; the UI shows a persistent banner and blocks writes.
+The simulated query delay is 350 ms by default (0/150/350/700 ms). The storage error rate can be set to 0/10/30/100%. Errors are thrown as `DataError`, never returned as HTTP responses.
 
 ---
 
-## 4. Endpoint → Flutter mapping
+## 4. Repository → Drift mapping
 
-| Mock endpoint | Future Flutter code |
+| Mock repository call | Future Flutter code |
 |---|---|
-| `GET /api/folders/:id/contents` | `FolderRepositoryInterface.watchFolderContents(id)` → `ListFolderContentsUsecase` |
-| `GET /api/folders/:id/delete-preview` | `FolderRepositoryInterface.getDeletePreview(id)` → `GetFolderDeletePreviewUsecase` |
-| `POST /api/folders` | `CreateFolderUsecase` |
-| `PATCH /api/folders/:id` | `RenameFolderUsecase` |
-| `DELETE /api/folders/:id` | `DeleteFolderUsecase` |
-| `GET /api/quizzes/:id` | `QuizRepositoryInterface.watchQuiz(id)` → `GetQuizDetailUsecase` |
-| `POST /api/quizzes/import` | `ImportQuizzesUsecase` after the pure JSON mapper validates the file |
-| `DELETE /api/quizzes/:id` | `DeleteQuizUsecase` |
-| `POST /api/attempts` | `CompleteAttemptUsecase` (the real use case computes the score, then the repository writes it) |
-| `GET /api/attempts/:id` | `AttemptRepositoryInterface.getAttempt(id)` → `GetAttemptUsecase` |
+| `folderContents(id)` | `FolderRepositoryInterface.watchFolderContents(id)` → `ListFolderContentsUsecase` |
+| `folderDeletePreview(id)` | `FolderRepositoryInterface.getDeletePreview(id)` → `GetFolderDeletePreviewUsecase` |
+| `createFolder(parentId, name)` | `CreateFolderUsecase` → `FolderRepositoryInterface.createFolder(...)` |
+| `renameFolder(id, name)` | `RenameFolderUsecase` → `FolderRepositoryInterface.renameFolder(...)` |
+| `deleteFolder(id)` | `DeleteFolderUsecase` → `FolderRepositoryInterface.deleteFolder(...)` |
+| `quiz(id)` | `QuizRepositoryInterface.watchQuiz(id)` → `GetQuizDetailUsecase` |
+| `importQuizzes(folderId, quizzes)` | `ImportQuizzesUsecase` → `QuizRepositoryInterface.importQuizzes(...)` |
+| `deleteQuiz(id)` | `DeleteQuizUsecase` → `QuizRepositoryInterface.deleteQuiz(...)` |
+| `saveAttempt(payload)` | `CompleteAttemptUsecase` → `AttemptRepositoryInterface.saveAttempt(...)` |
+| `attempt(id)` | `AttemptRepositoryInterface.getAttempt(id)` → `GetAttemptUsecase` |
 
-The client-side JSON parsing in the mock is a stand-in for the future pure Dart mapper. The HTTP payload after parsing is already the canonical quiz shape, so the repository boundary stays clean.
+The client-side JSON parsing in the mock stands in for the future pure Dart mapper. After parsing, the payload is already the canonical quiz shape, so the repository boundary stays clean.
+
+There is **no HTTP client, API client or fake server** in the real app. Repositories read and write Drift directly; the only external input is the JSON file picked by the user.
 
 ---
 
@@ -131,7 +134,7 @@ Stable IDs for the toolbar: `f-net`, `f-net-transport`, `f-empty`, `q-ipv4`, `a-
   - MSQ: at least two options and one or more unique in-range indices;
   - NAT: a finite numeric answer.
 - The preview shows one row per file with title, type counts, marks, valid/invalid status, repair notice and per-question errors, plus batch totals.
-- Invalid files are skipped; valid files can still be imported. Each file is atomic on the server.
+- Invalid files are skipped; valid files can still be imported. Each file is validated independently; a failed file never blocks the valid ones.
 - Limits: 5 MB / 1,000 questions per file; 50 files / 20 MB per batch.
 - The quiz `key` is stored but never used to block or merge imports.
 - After import, one quiz opens if exactly one was imported; otherwise the folder opens with a toast.
@@ -144,16 +147,17 @@ The **Sample import** and **Invalid import** buttons in the developer toolbar lo
 
 | State | Where to see it |
 |---|---|
-| Loading | Set latency to 700 ms and change screens; skeletons match the final layout |
+| Loading | Set query delay to 700 ms and change screens; skeletons match the final layout |
 | Empty | All folders (after deleting all top-level folders) or Archive (`f-empty`) |
 | Empty attempts | Any quiz with no attempts, e.g. a freshly imported quiz |
-| Error | Set error rate to 100% and change screens |
-| Offline | Toggle Offline, then change screens or try a mutation |
+| Storage error | Set storage error rate to 100% and change screens |
 | Validation | New folder with a blank or duplicate name; Import an invalid file |
-| Saving | Create/rename/delete/import with latency at 700 ms |
+| Saving | Create/rename/delete/import with query delay at 700 ms |
 | Success | Toast after create, rename, delete, import or saving an attempt |
 | Not found | `#/does-not-exist` or the toolbar's Not found option |
 | Dark theme | Toggle Dark theme in the developer toolbar |
+
+The app has no online/offline mode; local Drift is the only data source, so there is no offline banner.
 
 ---
 
@@ -163,12 +167,11 @@ Outside the phone frame (below it on narrow windows):
 
 - **Screen jump** — every key route.
 - **Data** — Reset data, Sample import, Invalid import, Empty folder.
-- **Latency** — 0 / 150 / 350 / 700 ms.
-- **Error rate** — 0 / 10 / 30 / 100%.
-- **Offline** — toggle.
+- **Query delay** — 0 / 150 / 350 / 700 ms.
+- **Storage error rate** — 0 / 10 / 30 / 100%.
 - **Dark theme** — toggle, persisted in `localStorage`.
 - **Screenshot mode** — hides the toolbar and frame chrome; an exit pill remains.
-- **Network log** — the last 50 requests as `METHOD path → status (ms)`.
+- **Data log** — the last 50 repository calls as `OK/ERR method → ms`.
 
 The toolbar is review-only and is never reachable from inside the app UI.
 
@@ -180,8 +183,8 @@ The toolbar is review-only and is never reachable from inside the app UI.
 - No per-question review screen. Attempts store `answers_json`; the UI shows the summary only.
 - Seeded attempts store `{}` in `answers_json`; newly completed attempts store real answers.
 - An in-progress attempt is not persisted if the page is reloaded or closed.
-- The import is client-side in the mock because `file://` blocks fetching local JSON. The real app uses `file_picker` and a pure Dart mapper.
-- The mock has no real network, accounts, analytics or sync.
+- The import is client-side in the mock because it runs in a browser. The real app uses `file_picker` and a pure Dart mapper.
+- The mock has no network, accounts, analytics or sync. Data lives in `localStorage`; the real app uses Drift.
 
 ---
 
@@ -191,5 +194,5 @@ The toolbar is review-only and is never reachable from inside the app UI.
 2. Browse a folder, open the IPv4 quiz, start an attempt, answer a few questions, press End.
 3. Check the result and the new row in the quiz's attempt history.
 4. Click the FAB inside Computer Networks and import the sample quiz.
-5. Use the developer toolbar to walk the loading, empty, error, offline and dark states.
+5. Use the developer toolbar to walk the loading, empty, storage-error and dark states.
 6. Try a duplicate folder name and an invalid import file to see validation.

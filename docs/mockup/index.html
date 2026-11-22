@@ -166,13 +166,6 @@
   .content::-webkit-scrollbar { display: none; }
   .content.flush { padding-left: 0; padding-right: 0; }
 
-  .offline-banner {
-    flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 18px;
-    background: var(--mid-soft); color: var(--mid); font-size: 12px; border-bottom: 1px solid var(--line);
-  }
-  .offline-banner span { flex: 1; }
-  .offline-banner .text-btn { color: var(--mid); font-weight: 650; }
-
   /* Typography blocks */
   .hero { padding: 6px 0 20px; }
   .hero h1 { font-size: 36px; line-height: 1.05; margin: 7px 0 8px; }
@@ -492,14 +485,14 @@
   .switch .slider::before { content: ''; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.15); transition: transform .18s ease; }
   .switch input:checked + .slider { background: var(--accent); }
   .switch input:checked + .slider::before { transform: translateX(15px); }
-  .netlog { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 11px; }
-  .netlog-head { display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
-  .netlog-list { list-style: none; margin: 0; padding: 0; max-height: 154px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; line-height: 1.55; }
-  .netlog-list li { display: flex; gap: 6px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
-  .netlog-list li:last-child { border-bottom: 0; }
-  .netlog-list .method { color: var(--muted); width: 30px; flex: none; }
-  .netlog-list .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .netlog-list .status { font-weight: 700; }
+  .datalog { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 11px; }
+  .datalog-head { display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+  .datalog-list { list-style: none; margin: 0; padding: 0; max-height: 154px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; line-height: 1.55; }
+  .datalog-list li { display: flex; gap: 6px; padding: 2px 0; border-bottom: 1px dashed var(--line); }
+  .datalog-list li:last-child { border-bottom: 0; }
+  .datalog-list .method { color: var(--muted); width: 30px; flex: none; }
+  .datalog-list .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .datalog-list .status { font-weight: 700; }
   .status-2 { color: var(--good); }
   .status-4 { color: var(--mid); }
   .status-5 { color: var(--danger); }
@@ -602,7 +595,7 @@
     </div>
 
     <div class="dev-section">
-      <div class="dev-label"><span>Latency</span><span id="latency-value">350 ms</span></div>
+      <div class="dev-label"><span>Query delay</span><span id="latency-value">350 ms</span></div>
       <div class="segment" id="latency-segment">
         <button type="button" data-latency="0">0</button>
         <button type="button" data-latency="150">150</button>
@@ -612,7 +605,7 @@
     </div>
 
     <div class="dev-section">
-      <div class="dev-label"><span>Error rate</span><span id="error-value">0%</span></div>
+      <div class="dev-label"><span>Storage error rate</span><span id="error-value">0%</span></div>
       <div class="segment" id="error-segment">
         <button type="button" data-error="0" class="active">0%</button>
         <button type="button" data-error="10">10%</button>
@@ -622,15 +615,14 @@
     </div>
 
     <div class="dev-section">
-      <div class="switch-row"><span>Offline</span><label class="switch"><input type="checkbox" id="dev-offline"><span class="slider"></span></label></div>
       <div class="switch-row"><span>Dark theme</span><label class="switch"><input type="checkbox" id="dev-dark"><span class="slider"></span></label></div>
       <div class="switch-row"><span>Screenshot mode</span><label class="switch"><input type="checkbox" id="dev-shot"><span class="slider"></span></label></div>
     </div>
 
-    <div class="netlog">
-      <div class="netlog-head"><span>Network log</span><span id="netlog-count">0</span></div>
-      <ul class="netlog-list" id="netlog-list"></ul>
-      <div class="dev-note">All requests go through the fake HTTP layer. Nothing leaves this page.</div>
+    <div class="datalog">
+      <div class="datalog-head"><span>Data log</span><span id="datalog-count">0</span></div>
+      <ul class="datalog-list" id="datalog-list"></ul>
+      <div class="dev-note">All reads and writes go through the local repository. Nothing leaves this page.</div>
     </div>
   </aside>
 </div>
@@ -1188,7 +1180,7 @@
 
   var SEED = buildSeed();
   var db = loadDb();
-  var netlog = [];
+  var datalog = [];
 
   function loadDb() {
     try {
@@ -1211,18 +1203,6 @@
     dataVersion++;
   }
   var dataVersion = 0;
-
-  /* ============================================================
-     4. Fake HTTP layer
-     ============================================================ */
-  window.__mock = { latencyMs: 350, errorRate: 0, offline: false };
-
-  function jsonResponse(body, status) {
-    return new Response(JSON.stringify(body), {
-      status: status || 200,
-      headers: { 'content-type': 'application/json' }
-    });
-  }
 
   function folderPath(id) {
     var path = [];
@@ -1317,14 +1297,47 @@
     return { score: score, max_score: maxScore };
   }
 
-  var routes = [
-    {
-      method: 'GET',
-      path: /^\/api\/folders\/([^/]+)\/contents$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+  /* ============================================================
+     4. Local repository — the mock of the Drift data layer
+     ============================================================ */
+  window.__mock = { latencyMs: 350, errorRate: 0 };
+
+  function DataError(code, message) {
+    this.code = code;
+    this.message = message;
+    this.name = 'DataError';
+  }
+  DataError.prototype = Object.create(Error.prototype);
+
+  function logData(name, outcome, ms) {
+    datalog.unshift({ name: name, outcome: outcome, ms: ms });
+    if (datalog.length > 50) datalog.pop();
+    renderDatalog();
+  }
+
+  async function callRepo(name, fn) {
+    var started = performance.now();
+    await sleep(window.__mock.latencyMs);
+    if (window.__mock.errorRate > 0 && Math.random() * 100 < window.__mock.errorRate) {
+      logData(name, 'error', Math.round(performance.now() - started));
+      throw new DataError('storage_error', 'The local database is unavailable. Please try again.');
+    }
+    try {
+      var result = fn();
+      logData(name, 'ok', Math.round(performance.now() - started));
+      return result;
+    } catch (e) {
+      logData(name, 'error', Math.round(performance.now() - started));
+      if (e instanceof DataError) throw e;
+      throw new DataError('storage_error', e && e.message ? e.message : 'Something went wrong.');
+    }
+  }
+
+  var repo = {
+    folderContents: function (id) {
+      return callRepo('folderContents', function () {
         var folder = id === 'root' ? null : db.folders.find(function (f) { return f.id === id; });
-        if (id !== 'root' && !folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        if (id !== 'root' && !folder) throw new DataError('folder_not_found', 'This folder no longer exists.');
         var parentId = folder ? folder.id : null;
         var folders = db.folders.filter(function (f) { return f.parent_folder_id === parentId; })
           .sort(function (a, b) { return a.name.localeCompare(b.name); })
@@ -1333,97 +1346,70 @@
           .sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); })
           .map(quizSummary);
         return {
-          status: 200,
-          body: {
-            data: {
-              folder: folder ? { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id, created_at: folder.created_at } : null,
-              path: folder ? folderPath(folder.id) : [],
-              folders: folders,
-              quizzes: quizzes,
-              stats: { folders: db.folders.length, quizzes: db.quizzes.length, attempts: db.attempts.length }
-            }
-          }
+          folder: folder ? { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id, created_at: folder.created_at } : null,
+          path: folder ? folderPath(folder.id) : [],
+          folders: folders,
+          quizzes: quizzes,
+          stats: { folders: db.folders.length, quizzes: db.quizzes.length, attempts: db.attempts.length }
         };
-      }
+      });
     },
-    {
-      method: 'GET',
-      path: /^\/api\/folders\/([^/]+)\/delete-preview$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    folderDeletePreview: function (id) {
+      return callRepo('folderDeletePreview', function () {
         var folder = db.folders.find(function (f) { return f.id === id; });
-        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        if (!folder) throw new DataError('folder_not_found', 'This folder no longer exists.');
         var ids = folderIdsUnder(id);
         var childIds = ids.filter(function (x) { return x !== id; });
         var quizzes = quizzesInFolders(ids);
         var attempts = db.attempts.filter(function (a) { return quizzes.some(function (q) { return q.id === a.quiz_id; }); });
         return {
-          status: 200,
-          body: {
-            data: {
-              folder: { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id },
-              folders: childIds.length,
-              quizzes: quizzes.length,
-              attempts: attempts.length,
-              questions: db.questions.filter(function (q) { return quizzes.some(function (x) { return x.id === q.quiz_id; }); }).length
-            }
-          }
+          folder: { id: folder.id, name: folder.name, parent_folder_id: folder.parent_folder_id },
+          folders: childIds.length,
+          quizzes: quizzes.length,
+          attempts: attempts.length,
+          questions: db.questions.filter(function (q) { return quizzes.some(function (x) { return x.id === q.quiz_id; }); }).length
         };
-      }
+      });
     },
-    {
-      method: 'POST',
-      path: /^\/api\/folders$/,
-      handler: function (ctx) {
-        var body = ctx.body || {};
-        var name = typeof body.name === 'string' ? body.name.trim() : '';
-        var parentId = body.parent_folder_id || null;
-        if (!name) return { status: 422, body: { error: { code: 'name_required', message: 'Give the folder a name.' } } };
-        if (name.length > 60) return { status: 422, body: { error: { code: 'name_too_long', message: 'Folder names can be up to 60 characters.' } } };
-        if (parentId) {
-          var parent = db.folders.find(function (f) { return f.id === parentId; });
-          if (!parent) return { status: 404, body: { error: { code: 'folder_not_found', message: 'The parent folder no longer exists.' } } };
+    createFolder: function (parentId, name) {
+      return callRepo('createFolder', function () {
+        var trimmed = typeof name === 'string' ? name.trim() : '';
+        parentId = parentId || null;
+        if (!trimmed) throw new DataError('name_required', 'Give the folder a name.');
+        if (trimmed.length > 60) throw new DataError('name_too_long', 'Folder names can be up to 60 characters.');
+        if (parentId && !db.folders.some(function (f) { return f.id === parentId; })) {
+          throw new DataError('folder_not_found', 'The parent folder no longer exists.');
         }
         var duplicate = db.folders.some(function (f) {
-          return (f.parent_folder_id || null) === parentId && f.name.toLowerCase() === name.toLowerCase();
+          return (f.parent_folder_id || null) === parentId && f.name.toLowerCase() === trimmed.toLowerCase();
         });
-        if (duplicate) return { status: 409, body: { error: { code: 'name_taken', message: 'A folder with this name already exists here.' } } };
-        var folder = {
-          id: uuid(), name: name, parent_folder_id: parentId,
-          created_at: new Date().toISOString()
-        };
+        if (duplicate) throw new DataError('name_taken', 'A folder with this name already exists here.');
+        var folder = { id: uuid(), name: trimmed, parent_folder_id: parentId, created_at: new Date().toISOString() };
         db.folders.push(folder);
         commit();
-        return { status: 201, body: { data: folderSummary(folder) } };
-      }
+        return folderSummary(folder);
+      });
     },
-    {
-      method: 'PATCH',
-      path: /^\/api\/folders\/([^/]+)$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    renameFolder: function (id, name) {
+      return callRepo('renameFolder', function () {
         var folder = db.folders.find(function (f) { return f.id === id; });
-        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
-        var body = ctx.body || {};
-        var name = typeof body.name === 'string' ? body.name.trim() : '';
-        if (!name) return { status: 422, body: { error: { code: 'name_required', message: 'Give the folder a name.' } } };
-        if (name.length > 60) return { status: 422, body: { error: { code: 'name_too_long', message: 'Folder names can be up to 60 characters.' } } };
+        if (!folder) throw new DataError('folder_not_found', 'This folder no longer exists.');
+        var trimmed = typeof name === 'string' ? name.trim() : '';
+        if (!trimmed) throw new DataError('name_required', 'Give the folder a name.');
+        if (trimmed.length > 60) throw new DataError('name_too_long', 'Folder names can be up to 60 characters.');
         var duplicate = db.folders.some(function (f) {
-          return f.id !== id && (f.parent_folder_id || null) === (folder.parent_folder_id || null) && f.name.toLowerCase() === name.toLowerCase();
+          return f.id !== id && (f.parent_folder_id || null) === (folder.parent_folder_id || null) && f.name.toLowerCase() === trimmed.toLowerCase();
         });
-        if (duplicate) return { status: 409, body: { error: { code: 'name_taken', message: 'A folder with this name already exists here.' } } };
-        folder.name = name;
+        if (duplicate) throw new DataError('name_taken', 'A folder with this name already exists here.');
+        folder.name = trimmed;
         commit();
-        return { status: 200, body: { data: folderSummary(folder) } };
-      }
+        return folderSummary(folder);
+      });
     },
-    {
-      method: 'DELETE',
-      path: /^\/api\/folders\/([^/]+)$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    deleteFolder: function (id) {
+      return callRepo('deleteFolder', function () {
         var folder = db.folders.find(function (f) { return f.id === id; });
-        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'This folder no longer exists.' } } };
+        if (!folder) throw new DataError('folder_not_found', 'This folder no longer exists.');
         var ids = folderIdsUnder(id);
         var quizzes = quizzesInFolders(ids);
         var quizIds = quizzes.map(function (q) { return q.id; });
@@ -1434,16 +1420,13 @@
         db.quizzes = db.quizzes.filter(function (q) { return quizIds.indexOf(q.id) === -1; });
         db.folders = db.folders.filter(function (f) { return ids.indexOf(f.id) === -1; });
         commit();
-        return { status: 204, body: null };
-      }
+        return null;
+      });
     },
-    {
-      method: 'GET',
-      path: /^\/api\/quizzes\/([^/]+)$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    quiz: function (id) {
+      return callRepo('getQuiz', function () {
         var quiz = db.quizzes.find(function (q) { return q.id === id; });
-        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        if (!quiz) throw new DataError('quiz_not_found', 'This quiz no longer exists.');
         var folder = db.folders.find(function (f) { return f.id === quiz.folder_id; });
         var questions = db.questions.filter(function (q) { return q.quiz_id === id; })
           .sort(function (a, b) { return a.position - b.position; })
@@ -1453,45 +1436,28 @@
             return Object.assign({}, q, { options: opts });
           });
         var attempts = attemptsForQuiz(id).map(attemptPayload);
-        return {
-          status: 200,
-          body: {
-            data: {
-              quiz: quiz,
-              folder: folder ? { id: folder.id, name: folder.name } : null,
-              questions: questions,
-              attempts: attempts
-            }
-          }
-        };
-      }
+        return { quiz: quiz, folder: folder ? { id: folder.id, name: folder.name } : null, questions: questions, attempts: attempts };
+      });
     },
-    {
-      method: 'DELETE',
-      path: /^\/api\/quizzes\/([^/]+)$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    deleteQuiz: function (id) {
+      return callRepo('deleteQuiz', function () {
         var quiz = db.quizzes.find(function (q) { return q.id === id; });
-        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        if (!quiz) throw new DataError('quiz_not_found', 'This quiz no longer exists.');
         var questionIds = db.questions.filter(function (q) { return q.quiz_id === id; }).map(function (q) { return q.id; });
         db.attempts = db.attempts.filter(function (a) { return a.quiz_id !== id; });
         db.question_options = db.question_options.filter(function (o) { return questionIds.indexOf(o.question_id) === -1; });
         db.questions = db.questions.filter(function (q) { return q.quiz_id !== id; });
         db.quizzes = db.quizzes.filter(function (q) { return q.id !== id; });
         commit();
-        return { status: 204, body: null };
-      }
+        return null;
+      });
     },
-    {
-      method: 'POST',
-      path: /^\/api\/quizzes\/import$/,
-      handler: function (ctx) {
-        var body = ctx.body || {};
-        var folderId = body.folder_id;
+    importQuizzes: function (folderId, quizzes) {
+      return callRepo('importQuizzes', function () {
         var folder = db.folders.find(function (f) { return f.id === folderId; });
-        if (!folder) return { status: 404, body: { error: { code: 'folder_not_found', message: 'Choose a folder before importing.' } } };
-        var incoming = Array.isArray(body.quizzes) ? body.quizzes : [];
-        if (!incoming.length) return { status: 422, body: { error: { code: 'no_quizzes', message: 'There are no valid quizzes to import.' } } };
+        if (!folder) throw new DataError('folder_not_found', 'Choose a folder before importing.');
+        var incoming = Array.isArray(quizzes) ? quizzes : [];
+        if (!incoming.length) throw new DataError('no_quizzes', 'There are no valid quizzes to import.');
         var imported = [];
         var skipped = [];
         incoming.forEach(function (raw) {
@@ -1514,29 +1480,24 @@
               tolerance: q.tolerance == null ? null : q.tolerance
             });
             (q.options || []).forEach(function (o, j) {
-              db.question_options.push({
-                id: uuid(), question_id: qid, text: o.text,
-                is_correct: o.is_correct ? 1 : 0, position: j
-              });
+              db.question_options.push({ id: uuid(), question_id: qid, text: o.text, is_correct: o.is_correct ? 1 : 0, position: j });
             });
           });
           imported.push({ id: quiz.id, title: quiz.title });
         });
         commit();
-        return { status: 201, body: { data: { imported: imported, skipped: skipped } } };
-      }
+        return { imported: imported, skipped: skipped };
+      });
     },
-    {
-      method: 'POST',
-      path: /^\/api\/attempts$/,
-      handler: function (ctx) {
-        var body = ctx.body || {};
+    saveAttempt: function (payload) {
+      return callRepo('saveAttempt', function () {
+        var body = payload || {};
         var quiz = db.quizzes.find(function (q) { return q.id === body.quiz_id; });
-        if (!quiz) return { status: 404, body: { error: { code: 'quiz_not_found', message: 'This quiz no longer exists.' } } };
+        if (!quiz) throw new DataError('quiz_not_found', 'This quiz no longer exists.');
         var started = new Date(body.started_at);
         var ended = new Date(body.ended_at);
         if (isNaN(started.getTime()) || isNaN(ended.getTime())) {
-          return { status: 422, body: { error: { code: 'invalid_time', message: 'The attempt timestamps are invalid.' } } };
+          throw new DataError('invalid_time', 'The attempt timestamps are invalid.');
         }
         var duration = Math.max(0, ended.getTime() - started.getTime());
         var result = scoreAttempt(quiz.id, body.answers || {});
@@ -1547,114 +1508,19 @@
         };
         db.attempts.push(attempt);
         commit();
-        return { status: 201, body: { data: { attempt: attemptPayload(attempt), quiz: quiz } } };
-      }
+        return { attempt: attemptPayload(attempt), quiz: quiz };
+      });
     },
-    {
-      method: 'GET',
-      path: /^\/api\/attempts\/([^/]+)$/,
-      handler: function (ctx) {
-        var id = decodeURIComponent(ctx.match[1]);
+    attempt: function (id) {
+      return callRepo('getAttempt', function () {
         var attempt = db.attempts.find(function (a) { return a.id === id; });
-        if (!attempt) return { status: 404, body: { error: { code: 'attempt_not_found', message: 'This attempt no longer exists.' } } };
+        if (!attempt) throw new DataError('attempt_not_found', 'This attempt no longer exists.');
         var quiz = db.quizzes.find(function (q) { return q.id === attempt.quiz_id; });
-        return { status: 200, body: { data: { attempt: attemptPayload(attempt), quiz: quiz || null } } };
-      }
+        return { attempt: attemptPayload(attempt), quiz: quiz || null };
+      });
     }
-  ];
-
-  window.fetch = async function (input, init) {
-    init = init || {};
-    var raw = typeof input === 'string' ? input : input.url;
-    var url = new URL(raw, location.href);
-    var requestPath = url.pathname.replace(/^\/[A-Za-z]:/, '') + url.search;
-    var method = (init.method || 'GET').toUpperCase();
-    var body = null;
-    try { body = init.body ? JSON.parse(init.body) : null; } catch (e) { body = null; }
-    var started = performance.now();
-    await sleep(window.__mock.latencyMs);
-
-    var status = 200;
-    var payload = null;
-    if (window.__mock.offline) {
-      status = 503;
-      payload = { error: { code: 'offline', message: 'You are offline. Reconnect to continue.' } };
-    } else if (window.__mock.errorRate > 0 && Math.random() * 100 < window.__mock.errorRate) {
-      status = 500;
-      payload = { error: { code: 'server_error', message: 'Something went wrong. Please try again.' } };
-    } else {
-      var route = null;
-      var match = null;
-      for (var i = 0; i < routes.length; i++) {
-        if (routes[i].method === method) {
-          var m = requestPath.match(routes[i].path);
-          if (m) { route = routes[i]; match = m; break; }
-        }
-      }
-      if (!route) {
-        status = 404;
-        payload = { error: { code: 'not_found', message: 'Not found.' } };
-      } else {
-        try {
-          var result = route.handler({ url: url, query: url.searchParams, body: body, match: match });
-          status = result.status || 200;
-          payload = result.body;
-        } catch (e) {
-          status = 500;
-          payload = { error: { code: 'server_error', message: e && e.message ? e.message : 'Something went wrong.' } };
-        }
-      }
-    }
-
-    var elapsed = Math.round(performance.now() - started);
-    netlog.unshift({ method: method, path: requestPath, status: status, ms: elapsed });
-    if (netlog.length > 50) netlog.pop();
-    renderNetlog();
-
-    if (status === 204) return new Response(null, { status: 204 });
-    return jsonResponse(payload, status);
   };
 
-  function ApiError(code, message, status) {
-    this.code = code;
-    this.message = message;
-    this.status = status;
-    this.name = 'ApiError';
-  }
-  ApiError.prototype = Object.create(Error.prototype);
-
-  async function apiRequest(path, options) {
-    var res = await fetch(path, options || {});
-    if (res.status === 204) return null;
-    var body;
-    try { body = await res.json(); } catch (e) { body = null; }
-    if (!res.ok) {
-      var err = body && body.error ? body.error : { code: 'unknown', message: 'Something went wrong.' };
-      throw new ApiError(err.code, err.message, res.status);
-    }
-    return body ? body.data : null;
-  }
-
-  var api = {
-    folderContents: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id) + '/contents'); },
-    folderDeletePreview: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id) + '/delete-preview'); },
-    createFolder: function (parentId, name) {
-      return apiRequest('/api/folders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ parent_folder_id: parentId, name: name }) });
-    },
-    renameFolder: function (id, name) {
-      return apiRequest('/api/folders/' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name }) });
-    },
-    deleteFolder: function (id) { return apiRequest('/api/folders/' + encodeURIComponent(id), { method: 'DELETE' }); },
-    quiz: function (id) { return apiRequest('/api/quizzes/' + encodeURIComponent(id)); },
-    deleteQuiz: function (id) { return apiRequest('/api/quizzes/' + encodeURIComponent(id), { method: 'DELETE' }); },
-    importQuizzes: function (folderId, quizzes) {
-      return apiRequest('/api/quizzes/import', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ folder_id: folderId, quizzes: quizzes }) });
-    },
-    saveAttempt: function (payload) {
-      return apiRequest('/api/attempts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-    },
-    attempt: function (id) { return apiRequest('/api/attempts/' + encodeURIComponent(id)); }
-  };
 
   /* ============================================================
      5. App state + UI helpers
@@ -1667,20 +1533,6 @@
   var currentHash = '#/';
   var screenData = { folder: null, quiz: null };
 
-  function isOffline() { return !!window.__mock.offline; }
-  function guardOffline() {
-    if (isOffline()) {
-      showToast('You are offline. Reconnect from the dev toolbar.');
-      return true;
-    }
-    return false;
-  }
-
-  function offlineBanner() {
-    if (!isOffline()) return '';
-    return '<div class="offline-banner">' + icon('wifiOff', 15) + '<span>Offline — writes are paused.</span><button class="text-btn" data-action="retry" type="button">Retry</button></div>';
-  }
-
   function shell(opts) {
     var o = opts || {};
     var back = o.back;
@@ -1691,7 +1543,6 @@
         '<div class="appbar-title">' + esc(o.title || '') + '</div>' +
         '<div class="appbar-actions">' + actions + '</div>' +
       '</header>' +
-      (o.banner === false ? '' : offlineBanner()) +
       '<main class="content' + (o.flush ? ' flush' : '') + '">' + (o.content || '') + '</main>' +
       (o.footer || '') +
       (o.fab || '') +
@@ -1708,7 +1559,7 @@
     for (var i = 0; i < (rows || 7); i++) {
       body += '<div class="skeleton-row"><div class="s-icon skeleton"></div><div class="s-lines"><div class="s-line mid skeleton"></div><div class="s-line short skeleton"></div></div></div>';
     }
-    setScreen(shell({ title: title || '', back: back, content: body, banner: false }));
+    setScreen(shell({ title: title || '', back: back, content: body }));
   }
 
   function emptyState(iconName, title, text, actionLabel, actionHash, action, actionAttrs) {
@@ -1887,7 +1738,7 @@
     var id = params.id || 'root';
     skeletonScreen(id === 'root' ? 'All folders' : 'Folder', id === 'root' ? null : '/', 7);
     try {
-      var data = await api.folderContents(id);
+      var data = await repo.folderContents(id);
       if (token !== renderToken) return;
       screenData.folder = data;
       screenData.quiz = null;
@@ -1957,7 +1808,7 @@
   async function renderQuiz(params, query, token) {
     skeletonScreen('Quiz', '/', 6);
     try {
-      var data = await api.quiz(params.id);
+      var data = await repo.quiz(params.id);
       if (token !== renderToken) return;
       screenData.quiz = data;
       screenData.folder = null;
@@ -2070,7 +1921,7 @@
     }
     skeletonScreen('Attempt', '/quizzes/' + params.id, 4);
     try {
-      var data = await api.quiz(params.id);
+      var data = await repo.quiz(params.id);
       if (token !== renderToken) return;
       attemptPreload = data;
       var quiz = data.quiz;
@@ -2126,7 +1977,6 @@
         '<div class="timer-chip">' + icon('timer', 14) + '<span id="attempt-timer">00:00</span></div>' +
         '<div class="appbar-actions"><button class="btn outline small" data-action="end-attempt" type="button">End</button></div>' +
       '</header>' +
-      offlineBanner() +
       '<main class="content">' + content + '</main>' +
       footer +
     '</div>');
@@ -2136,7 +1986,7 @@
   async function renderResult(params, query, token) {
     skeletonScreen('Result', '/', 4);
     try {
-      var data = await api.attempt(params.id);
+      var data = await repo.attempt(params.id);
       if (token !== renderToken) return;
       var a = data.attempt;
       var quiz = data.quiz;
@@ -2216,7 +2066,7 @@
     setScreen(shell({ title: 'Import', back: '/folders/' + encodeURIComponent(folderId), content: '<div class="skeleton-row"><div class="s-icon skeleton"></div><div class="s-lines"><div class="s-line mid skeleton"></div><div class="s-line short skeleton"></div></div></div>' }));
 
     try {
-      var data = await api.folderContents(folderId);
+      var data = await repo.folderContents(folderId);
       if (token !== renderToken) return;
       if (!data.folder) throw new Error('Choose a folder before importing.');
       importState.folder = data.folder;
@@ -2379,7 +2229,6 @@
 
   async function importFiles() {
     if (!importState || importState.importing) return;
-    if (guardOffline()) return;
     var valid = importState.files.filter(function (f) { return f.status === 'valid'; });
     if (!valid.length) {
       showToast('There are no valid quizzes to import.', 'alert');
@@ -2388,7 +2237,7 @@
     importState.importing = true;
     drawImport();
     try {
-      var result = await api.importQuizzes(importState.folderId, valid.map(function (f) { return f.quiz; }));
+      var result = await repo.importQuizzes(importState.folderId, valid.map(function (f) { return f.quiz; }));
       var imported = result.imported || [];
       var skipped = (result.skipped || []).length + importState.files.filter(function (f) { return f.status === 'invalid'; }).length;
       var folderId = importState.folderId;
@@ -2417,7 +2266,7 @@
       if (row) return { name: row.name, folders: row.folder_count, quizzes: row.quiz_count };
     }
     try {
-      var d = await api.folderContents(folderId);
+      var d = await repo.folderContents(folderId);
       return d.folder ? { name: d.folder.name, folders: d.folders.length, quizzes: d.quizzes.length } : null;
     } catch (e) { return null; }
   }
@@ -2435,7 +2284,7 @@
       if (row) return { quiz: { id: row.id, title: row.title, folder_id: row.folder_id }, question_count: row.question_count, attempt_count: row.attempt_count };
     }
     try {
-      var d = await api.quiz(quizId);
+      var d = await repo.quiz(quizId);
       return { quiz: d.quiz, question_count: d.questions.length, attempt_count: d.attempts.length };
     } catch (e) { return null; }
   }
@@ -2518,8 +2367,7 @@
 
   async function deleteFolderSheet(folderId) {
     try {
-      var preview = await api.folderDeletePreview(folderId);
-      if (isOffline()) { showToast('You are offline. Reconnect to delete.', 'alert'); return; }
+      var preview = await repo.folderDeletePreview(folderId);
       openOverlay(sheet(
         '<h3>Delete "' + esc(preview.folder.name) + '"?</h3>' +
         '<p class="sheet-sub">This removes the folder and everything inside it. This cannot be undone.</p>' +
@@ -2577,7 +2425,6 @@
 
   async function confirmEndAttempt() {
     if (!attempt) return;
-    if (guardOffline()) return;
     var btn = $('[data-action="confirm-end"]');
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving…'; }
     var quizId = attempt.quiz.id;
@@ -2588,7 +2435,7 @@
       answers: attempt.answers
     };
     try {
-      var result = await api.saveAttempt(payload);
+      var result = await repo.saveAttempt(payload);
       clearAttempt();
       closeOverlay();
       go('/quizzes/' + encodeURIComponent(quizId) + '/result/' + encodeURIComponent(result.attempt.id), 'Attempt saved', 'check');
@@ -2667,11 +2514,10 @@
         break;
       case 'confirm-delete-folder':
         (async function () {
-          if (guardOffline()) return;
           el.disabled = true; el.innerHTML = '<span class="spinner"></span> Deleting…';
           try {
             var parent = el.getAttribute('data-parent') || null;
-            await api.deleteFolder(id);
+            await repo.deleteFolder(id);
             closeOverlay();
             go(parent ? '/folders/' + encodeURIComponent(parent) : '/', 'Folder deleted', 'trash');
           } catch (err) { el.disabled = false; el.textContent = 'Delete folder'; showToast(err.message, 'alert'); }
@@ -2679,18 +2525,16 @@
         break;
       case 'confirm-delete-quiz':
         (async function () {
-          if (guardOffline()) return;
           el.disabled = true; el.innerHTML = '<span class="spinner"></span> Deleting…';
           try {
             var folderId = el.getAttribute('data-folder') || null;
-            await api.deleteQuiz(id);
+            await repo.deleteQuiz(id);
             closeOverlay();
             go(folderId ? '/folders/' + encodeURIComponent(folderId) : '/', 'Quiz deleted', 'trash');
           } catch (err) { el.disabled = false; el.textContent = 'Delete quiz'; showToast(err.message, 'alert'); }
         })();
         break;
       case 'begin-attempt':
-        if (guardOffline()) return;
         beginAttempt();
         break;
       case 'attempt-exit':
@@ -2764,7 +2608,6 @@
     var form = e.target.closest('form[data-form]');
     if (!form) return;
     e.preventDefault();
-    if (guardOffline()) return;
     var kind = form.getAttribute('data-form');
     var nameInput = form.querySelector('input[name="name"]');
     var errorEl = form.querySelector('#folder-error');
@@ -2786,12 +2629,12 @@
     try {
       if (kind === 'new-folder') {
         var parent = form.getAttribute('data-parent') || null;
-        await api.createFolder(parent, name);
+        await repo.createFolder(parent, name);
         closeOverlay();
         renderRoute();
         showToast('Folder created', 'check');
       } else if (kind === 'rename-folder') {
-        await api.renameFolder(form.getAttribute('data-id'), name);
+        await repo.renameFolder(form.getAttribute('data-id'), name);
         closeOverlay();
         renderRoute();
         showToast('Folder renamed', 'check');
@@ -2835,14 +2678,14 @@
     }
   }
 
-  function renderNetlog() {
-    var list = document.getElementById('netlog-list');
+  function renderDatalog() {
+    var list = document.getElementById('datalog-list');
     if (!list) return;
-    var count = document.getElementById('netlog-count');
-    if (count) count.textContent = String(netlog.length);
-    list.innerHTML = netlog.map(function (r) {
-      var cls = r.status >= 500 ? 'status-5' : r.status >= 400 ? 'status-4' : 'status-2';
-      return '<li><span class="method">' + esc(r.method) + '</span><span class="path">' + esc(r.path) + '</span><span class="status ' + cls + '">' + r.status + '</span></li>';
+    var count = document.getElementById('datalog-count');
+    if (count) count.textContent = String(datalog.length);
+    list.innerHTML = datalog.map(function (r) {
+      var cls = r.outcome === 'error' ? 'status-5' : 'status-2';
+      return '<li><span class="method">' + (r.outcome === 'ok' ? 'OK' : 'ERR') + '</span><span class="path">' + esc(r.name) + '</span><span class="status ' + cls + '">' + r.ms + ' ms</span></li>';
     }).join('');
   }
 
@@ -2886,13 +2729,6 @@
         if (ev) ev.textContent = window.__mock.errorRate + '%';
       });
     });
-    var offline = document.getElementById('dev-offline');
-    if (offline) {
-      offline.addEventListener('change', function () {
-        window.__mock.offline = offline.checked;
-        renderRoute();
-      });
-    }
     var dark = document.getElementById('dev-dark');
     if (dark) {
       dark.addEventListener('change', function () {

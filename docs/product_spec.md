@@ -231,6 +231,7 @@ Notes:
 - The import format has no marks field, so every question is worth 1 mark and the quiz total equals the question count.
 - `sourceKey` is stored for traceability but is not used for duplicate detection: re-importing the same `key` always creates a new quiz.
 - `difficulty`, `explanation` and `unit` are stored even though the MVP UI does not show explanations; this avoids losing source data on import.
+- There is no HTTP client, API layer or remote server. Repositories read and write Drift directly; the only external input is the JSON file the user picks.
 
 ---
 
@@ -373,8 +374,8 @@ Before saving, show one row per selected file: title, subtitle, question counts 
 
 | Area | Requirement |
 |---|---|
-| Offline | 100% functional with no network connection; no network calls at runtime |
-| Storage | Local SQLite via Drift; schema migrations versioned |
+| Offline | 100% functional with no network connection; no HTTP client or network calls at runtime |
+| Storage | Local SQLite via Drift; repositories access Drift directly; schema migrations versioned |
 | Startup | Folder tree usable within ~2 s on a mid-range device |
 | Import | A 50-file / 20 MB batch is validated and saved within ~15 s; a 1,000-question single file within ~3 s, including backslash repair |
 | Math | Inline formulas render with the surrounding text and fall back to raw TeX on parse failure |
@@ -429,6 +430,7 @@ Before saving, show one row per selected file: title, subtitle, question counts 
 | 2026-11-22 | `key` stored but ignored for duplicate detection; re-imports always create a new quiz | User |
 | 2026-11-22 | GitHub repository `RanjanKiran707/quiz_app`, public | User |
 | 2026-11-22 | Timing derived from timestamps; attempt saved only on End | Spec assumption |
+| 2026-11-22 | No HTTP/API layer; every read and write goes through Drift repositories directly (the mockup calls a local repository facade) | User |
 | 2026-11-22 | Quizzes only inside folders; root holds folders only | Derived from PRD |
 | 2026-11-22 | Answers stored per attempt for future review | Spec assumption |
 
@@ -453,7 +455,7 @@ The Flutter workflow documents in `Flutter/` govern delivery.
 1. Git initialisation and push to `github.com/RanjanKiran707/quiz_app` (public).
 2. `docs/dependencies.html` — Drift, `drift_flutter`, `file_picker`, `intl`, `uuid`, `flutter_math_fork`; dev: `drift_dev`, `build_runner`, `integration_test`.
 3. `docs/data_model.html` — interactive ER diagram.
-4. `docs/mockup/index.html` + `screens.md` — complete clickable prototype, mock data, fake HTTP, `localStorage`; bundle KaTeX under `docs/mockup/assets/` for offline math rendering; approval required.
+4. `docs/mockup/index.html` + `screens.md` — complete clickable prototype, mock data, local repository (no HTTP), `localStorage`; bundle KaTeX under `docs/mockup/assets/` for offline math rendering; approval required.
 5. `flutter create . --project-name quiz_app`, add packages, `flutter analyze`.
 
 ### Phase 1 — Data
