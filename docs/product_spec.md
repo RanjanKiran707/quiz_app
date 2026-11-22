@@ -1,6 +1,6 @@
 # Quiz App — Product Specification
 
-**Status:** Draft v2 — awaiting approval
+**Status:** Draft v3 — awaiting approval
 **Date:** 2026-11-22
 **Source:** User PRD plus decisions agreed on 2026-11-22
 **App / package name:** `quiz_app`
@@ -18,7 +18,7 @@ The product is deliberately small: folder navigation, JSON import, quiz taking, 
 ### Core value
 
 1. Keep many quizzes tidy in a folder tree.
-2. Bring content in quickly through a JSON file.
+2. Bring content in quickly through one or more JSON files.
 3. Practise the three question formats that matter: MCQ, MSQ, Numerical.
 4. See exactly how each attempt went: score, time taken, date.
 
@@ -30,7 +30,7 @@ The product is deliberately small: folder navigation, JSON import, quiz taking, 
 
 - Arbitrarily nested folders that can hold sub-folders and quizzes.
 - Create, rename and delete folders; delete quizzes.
-- Import a quiz from a `.json` file into the current folder.
+- Import one or more quizzes from `.json` files into the current folder.
 - Attempt a quiz unlimited times.
 - Support only MCQ, MSQ and Numerical questions.
 - Explicit **Start** and **End** controls with elapsed-time tracking.
@@ -57,7 +57,7 @@ Single local user, typically a student or self-learner.
 | Job | Trigger | Desired outcome |
 |---|---|---|
 | Organise content | Quiz collection grows | Folders make the right quiz easy to find |
-| Add a quiz | A quiz JSON exists | Imported into the chosen folder in one flow |
+| Add a quiz | One or more quiz JSON files exist | Imported into the chosen folder in one flow |
 | Practise | Ready to test knowledge | Start, answer, end, see score |
 | Check progress | Wants proof of practice | Attempt history shows score, time and date |
 
@@ -70,7 +70,7 @@ No onboarding, login or profile is required.
 | Area | MVP | Future |
 |---|---|---|
 | Folders | Nested tree, create / rename / delete | Move, reorder, drag and drop |
-| Quizzes | JSON import, delete, unlimited attempts | Edit, duplicate, share, playlist/YouTube import |
+| Quizzes | JSON import (single or batch), delete, unlimited attempts | Edit, duplicate, share, playlist/YouTube import |
 | Question types | MCQ, MSQ, Numerical | True/False, fill-in-the-blank, matching |
 | Attempts | Start/End timing, score, history | Per-question review, resume, pause |
 | Data | Local SQLite (Drift), fully offline | Cloud backup / sync |
@@ -118,15 +118,16 @@ Rules:
 | ID | Requirement |
 |---|---|
 | FR-2.1 | **Import quiz** is available inside a folder (not at the root). |
-| FR-2.2 | The user picks one `.json` file through the platform file picker. |
-| FR-2.3 | The file is parsed and fully validated before anything is written. Import is atomic: either the whole quiz is saved or nothing is saved. |
-| FR-2.4 | A preview before saving shows the quiz title, question count by type, and total marks. |
-| FR-2.5 | Validation failures are listed with a question number and a plain-language reason (see §10). |
-| FR-2.6 | A successful import creates one new quiz in the current folder and opens it. |
+| FR-2.2 | The user picks one or more `.json` files in a single file-picker dialog. |
+| FR-2.3 | Each file is parsed and fully validated before anything is written. Each file imports atomically: either that whole quiz is saved or nothing from that file is saved. |
+| FR-2.4 | The preview lists every selected file with its title, question count by type, total marks and validation status, plus batch totals (files, questions, marks). |
+| FR-2.5 | Validation failures are listed per file with a question number and a plain-language reason (see §10). Invalid files are skipped; valid files in the same batch can still be imported. |
+| FR-2.6 | A successful batch creates one new quiz per valid file in the current folder. If exactly one quiz was imported it opens; otherwise the folder is shown with the new quizzes and an `N imported, M skipped` summary. |
 | FR-2.7 | Importing the same file twice creates two independent quizzes; existing quizzes are never modified or replaced. |
-| FR-2.8 | Limits: file ≤ 5 MB, at most 1,000 questions per quiz. Oversized files are rejected with a clear message. |
+| FR-2.8 | Limits: each file ≤ 5 MB and ≤ 1,000 questions; each batch ≤ 50 files and ≤ 20 MB total. Oversized files or batches are rejected with a clear message. |
 | FR-2.9 | The import format is the compact quiz format documented in §10: `title`, optional `subtitle` and `key`, and a `questions` array whose items use `t` (`MCQ` / `MSQ` / `NAT`), `q`, `o`, `a`, `e`, and optional `d` / `u`. |
 | FR-2.10 | Files produced by the user's current generator contain unescaped LaTeX backslashes and are therefore not strict JSON. The importer repairs backslash sequences inside strings before parsing (§10.3) and tells the user that regenerating valid JSON is recommended. |
+| FR-2.11 | Batch import is all-or-nothing per file, not per batch: a failed file never rolls back files that already imported successfully. |
 
 ### FR-3 Question types
 
@@ -182,7 +183,7 @@ Only three types are supported. Each question carries a prompt, a positive mark 
 
 - Deleting a quiz removes its questions, options, attempts and answers after confirmation.
 - Deleting a folder cascades to descendants and their content.
-- Import and attempt-saving each run inside a database transaction.
+- Each file import and each attempt save run inside a database transaction.
 - Foreign keys are enforced and cascades are tested.
 
 ---
@@ -241,7 +242,7 @@ Notes:
 | 2 | Create folder dialog | Name and create a folder | idle, validation error, saving |
 | 3 | Rename folder dialog | Rename an existing folder | idle, validation error, saving |
 | 4 | Delete folder dialog | Confirm cascade deletion with counts | idle, deleting |
-| 5 | Import quiz screen | Pick file, validate, preview, import | idle, picking, validating, invalid, valid preview, importing, error |
+| 5 | Import quiz screen | Pick one or more files, validate, preview and import | idle, picking, validating, partial-invalid preview, valid preview, importing, batch result, error |
 | 6 | Quiz detail | Metadata, Start, attempt history, delete | loading, empty history, loaded, error |
 | 7 | Attempt — pre-start | Rules and Start control | idle |
 | 8 | Attempt — running | Questions, answers, live timer, End | running, validation hint, end confirmation |
@@ -307,7 +308,7 @@ Rules:
 | NAT: `a` is a finite number | "Question 4 needs a numeric answer." |
 | No empty or duplicate option text | "Question 4 has an empty or repeated option." |
 
-All errors are collected and shown together where possible. Nothing is written unless the whole file is valid.
+All errors are collected and shown per file. Nothing is written for a file unless that whole file is valid; other valid files in the batch are unaffected.
 
 ### 10.3 Non-standard backslashes
 
@@ -327,7 +328,7 @@ This repair is scoped to import and is tested against `docs/quiz.json` (124 unes
 
 ### 10.4 Import preview
 
-Before saving, show the parsed summary: title, subtitle, question counts by type, maximum marks, and a notice if the file needed backslash repair. The user can cancel or confirm.
+Before saving, show one row per selected file: title, subtitle, question counts by type, maximum marks, validation status and any backslash-repair notice. Show batch totals (files, questions, marks). The user can deselect files, cancel, or import all valid files; invalid files are clearly marked and skipped. After the import, show a per-file result summary (`imported`, `skipped with reason`).
 
 ---
 
@@ -375,10 +376,10 @@ Before saving, show the parsed summary: title, subtitle, question counts by type
 | Offline | 100% functional with no network connection; no network calls at runtime |
 | Storage | Local SQLite via Drift; schema migrations versioned |
 | Startup | Folder tree usable within ~2 s on a mid-range device |
-| Import | 1,000-question file validated and saved within ~3 s, including backslash repair |
+| Import | A 50-file / 20 MB batch is validated and saved within ~15 s; a 1,000-question single file within ~3 s, including backslash repair |
 | Math | Inline formulas render with the surrounding text and fall back to raw TeX on parse failure |
 | Scrolling | Lists remain smooth with hundreds of rows (lazy lists) |
-| Reliability | No partial imports; saved attempts survive restarts; back navigation cannot corrupt an attempt |
+| Reliability | No partial imports per file (a failed file never rolls back successful files); saved attempts survive restarts; back navigation cannot corrupt an attempt |
 | Privacy | No accounts, analytics or telemetry; all data stays on the device |
 | Time accuracy | Duration derived from timestamps, unaffected by UI ticks or backgrounding |
 | Localisation | English only in MVP; date/time formatted with `intl` |
@@ -388,11 +389,11 @@ Before saving, show the parsed summary: title, subtitle, question counts by type
 
 ## 13. Acceptance criteria
 
-1. A new user can create a folder, open it, and import a valid quiz JSON in under a minute.
+1. A new user can create a folder, open it, and import one or more valid quiz JSON files in under a minute.
 2. A folder can contain folders and quizzes to at least five levels, and every level is reachable via breadcrumb and back.
 3. Folder names that are blank, too long, or duplicate siblings are rejected inline.
 4. Deleting a non-empty folder shows counts and removes the whole subtree only after confirmation.
-5. An invalid JSON file is rejected with per-question reasons, and no quiz or question is created.
+5. An invalid JSON file in a batch is rejected with per-question reasons; nothing from that file is created, and valid files in the same batch can still import.
 6. A valid MCQ, MSQ and Numerical quiz imports with the correct prompt, options, marks and answers.
 7. The attempt screen hides questions until Start.
 8. The timer starts exactly on Start, keeps elapsed time while the app is backgrounded, and stops on End.
@@ -408,6 +409,8 @@ Before saving, show the parsed summary: title, subtitle, question counts by type
 18. `docs/quiz.json` imports as a 35-question quiz worth 35 marks: 15 MCQ, 10 MSQ and 10 NAT.
 19. A file containing unescaped `\(...\)` LaTeX, including `\times` and `\text`, imports with the math intact after repair and shows the regeneration notice.
 20. Inline math in prompts and options renders without raw backslashes or error boxes.
+21. Selecting multiple JSON files imports one quiz per valid file in a single flow and shows a per-file result summary.
+22. A batch containing an unreadable or invalid file skips that file with a reason and still imports the remaining valid files.
 
 ---
 
@@ -421,6 +424,7 @@ Before saving, show the parsed summary: title, subtitle, question counts by type
 | 2026-11-22 | MSQ scoring: all-or-nothing | User |
 | 2026-11-22 | Mobile-first responsive UI | User |
 | 2026-11-22 | Import format: the compact `t`/`q`/`o`/`a`/`e` format sampled in `docs/quiz.json` | User |
+| 2026-11-22 | Multiple JSON files can be imported in one batch (multi-select, per-file atomicity) | User |
 | 2026-11-22 | Math rendered with a Flutter TeX renderer (`flutter_math_fork`), not plain text | User |
 | 2026-11-22 | `key` stored but ignored for duplicate detection; re-imports always create a new quiz | User |
 | 2026-11-22 | GitHub repository `RanjanKiran707/quiz_app`, public | User |
