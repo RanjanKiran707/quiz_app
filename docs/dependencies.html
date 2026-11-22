@@ -102,8 +102,8 @@
     <div class="meta">
       <span class="pill status">Awaiting approval</span>
       <span class="pill">22 Nov 2026</span>
-      <span class="pill">Flutter 3.35.7</span>
-      <span class="pill">Dart 3.9.2</span>
+      <span class="pill">Flutter 3.50.1</span>
+      <span class="pill">Dart 3.14.0</span>
       <span class="pill">Android · iOS · Windows</span>
     </div>
   </header>
@@ -124,19 +124,19 @@
       <tbody>
         <tr>
           <td class="pkg">drift</td>
-          <td class="ver">2.32.1</td>
+          <td class="ver">2.35.4</td>
           <td class="purpose">Typed SQLite database: tables, migrations, foreign keys and reactive <code>watch</code> queries.</td>
           <td class="why">Folders, quizzes, questions and attempts are relational and must update live. Drift gives typed queries, cascades and streams without hand-written SQL plumbing.</td>
         </tr>
         <tr>
           <td class="pkg">drift_flutter</td>
-          <td class="ver">0.3.0</td>
+          <td class="ver">0.3.1</td>
           <td class="purpose">Opens the Drift database on Android, iOS and desktop with the correct app-data path and SQLite libraries.</td>
           <td class="why">Removes platform-specific database setup from <code>main()</code> and keeps the data layer portable.</td>
         </tr>
         <tr>
           <td class="pkg">file_picker</td>
-          <td class="ver">11.0.3</td>
+          <td class="ver">13.4.1</td>
           <td class="purpose">Native file picker used to choose one or more quiz <code>.json</code> files.</td>
           <td class="why">The PRD requires file-based import. It covers Android, iOS and Windows with one API.</td>
         </tr>
@@ -171,13 +171,13 @@
       <tbody>
         <tr>
           <td class="pkg">drift_dev</td>
-          <td class="ver">2.32.1</td>
+          <td class="ver">2.35.3</td>
           <td class="purpose">Generates the Drift table, query and database code.</td>
           <td class="why">Must match the <code>drift</code> runtime version.</td>
         </tr>
         <tr>
           <td class="pkg">build_runner</td>
-          <td class="ver">2.15.1</td>
+          <td class="ver">2.17.1</td>
           <td class="purpose">Runs <code>drift_dev</code> code generation.</td>
           <td class="why">Standard build tool; generated files are committed so the app builds without an extra step.</td>
         </tr>
@@ -227,14 +227,13 @@
   <section>
     <h2>Version compatibility</h2>
     <p>
-      This machine runs <strong>Flutter 3.35.7 / Dart 3.9.2</strong>. The newest pub releases of
-      <code>drift</code> (2.35.4), <code>drift_flutter</code> (0.3.1), <code>file_picker</code> (13.4.1)
-      and <code>build_runner</code> (2.17.1) require Dart 3.10 or newer, so <code>pub</code> will resolve
-      the newest compatible versions listed above. That is the recommended path.
+      Flutter was upgraded to <strong>3.50.1 / Dart 3.14.0</strong> on 22 Nov 2026, so the newest
+      release of every package is available. <code>flutter doctor</code> reports no issues. Resolved
+      versions are recorded in <code>pubspec.lock</code> and committed.
     </p>
     <div class="note">
-      <strong>Optional:</strong> run <code>flutter upgrade</code> before setup to use the very latest
-      package versions. It adds time and a small compatibility risk, and is not required by the MVP.
+      <strong>SDK change:</strong> this is a global upgrade from 3.35.7. The app is new, so no project
+      migration is needed; other local projects will also use Flutter 3.50.1 from now on.
     </div>
   </section>
 
@@ -246,7 +245,7 @@ flutter pub add dev:integration_test --sdk=flutter
 dart run build_runner build --delete-conflicting-outputs
 flutter analyze</pre>
     <p class="small muted" style="margin-top:12px;">
-      Versions are resolved by <code>pub</code> for Dart 3.9.2. The resolved versions are recorded in
+      Versions are resolved by <code>pub</code> for Dart 3.14.0. The resolved versions are recorded in
       <code>pubspec.lock</code> and committed.
     </p>
   </section>
