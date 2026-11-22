@@ -5,6 +5,8 @@ import 'package:quiz_app/core/utils/format.dart';
 import 'package:quiz_app/core/utils/view_state.dart';
 import 'package:quiz_app/core/widgets/app_widgets.dart';
 import 'package:quiz_app/features/attempt/attempt_view.dart';
+import 'package:quiz_app/features/attempt_review/attempt_review_view.dart';
+import 'package:quiz_app/features/attempt_review/attempt_review_view_model.dart';
 import 'package:quiz_app/features/result/result_view_model.dart';
 import 'package:quiz_app/core/widgets/obx_value.dart';
 import 'package:quiz_app/domain/use_cases/ui/get_attempt_screen/get_attempt_screen_return_model.dart';
@@ -218,6 +220,20 @@ class _ResultViewState extends State<ResultView> {
           ),
           const SizedBox(height: 18),
           if (quiz != null) ...[
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AttemptReviewView(
+                    bundle: AttemptReviewBundle(attemptId: attempt.id),
+                  ),
+                ),
+              ),
+              icon: const Icon(Icons.menu_book_outlined, size: 17),
+              label: const Text('Review answers'),
+              style: appSecondaryButtonStyle(context),
+            ),
+            const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: () {
                 Navigator.pushReplacement(

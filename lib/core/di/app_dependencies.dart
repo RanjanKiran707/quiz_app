@@ -13,6 +13,7 @@ import 'package:quiz_app/domain/use_cases/business/delete_quiz/delete_quiz_useca
 import 'package:quiz_app/domain/use_cases/business/import_quizzes/import_quizzes_usecase.dart';
 import 'package:quiz_app/domain/use_cases/business/rename_folder/rename_folder_usecase.dart';
 import 'package:quiz_app/domain/use_cases/ui/get_attempt_screen/get_attempt_screen_usecase.dart';
+import 'package:quiz_app/domain/use_cases/ui/get_attempt_review/get_attempt_review_usecase.dart';
 import 'package:quiz_app/domain/use_cases/ui/get_folder/get_folder_usecase.dart';
 import 'package:quiz_app/domain/use_cases/ui/get_folder_delete_preview/get_folder_delete_preview_usecase.dart';
 import 'package:quiz_app/domain/use_cases/ui/get_quiz_screen/get_quiz_screen_usecase.dart';
@@ -37,6 +38,7 @@ class AppDependencies {
   final ListFolderContentsUsecase listFolderContents;
   final GetQuizScreenUsecase getQuizScreen;
   final GetAttemptScreenUsecase getAttemptScreen;
+  final GetAttemptReviewUsecase getAttemptReview;
   final GetFolderUsecase getFolder;
   final GetFolderDeletePreviewUsecase getFolderDeletePreview;
   final ParseQuizJsonUsecase parseQuizJson;
@@ -55,6 +57,7 @@ class AppDependencies {
     required this.listFolderContents,
     required this.getQuizScreen,
     required this.getAttemptScreen,
+    required this.getAttemptReview,
     required this.getFolder,
     required this.getFolderDeletePreview,
     required this.parseQuizJson,
@@ -87,6 +90,8 @@ class AppDependencies {
       getQuizScreen: GetQuizScreenUsecase(quizRepository, attemptRepository),
       getAttemptScreen:
           GetAttemptScreenUsecase(attemptRepository, quizRepository),
+      getAttemptReview:
+          GetAttemptReviewUsecase(attemptRepository, quizRepository),
       getFolder: GetFolderUsecase(folderRepository),
       getFolderDeletePreview:
           GetFolderDeletePreviewUsecase(folderRepository),

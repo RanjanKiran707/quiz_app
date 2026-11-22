@@ -86,5 +86,15 @@ void main() {
 
     expect(find.text('Saved to history'), findsOneWidget);
     expect(find.text('100%'), findsWidgets);
+
+    await tester.scrollUntilVisible(find.text('Review answers'), 200);
+    await tester.tap(find.text('Review answers'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ANSWER REVIEW'), findsOneWidget);
+    expect(find.text('YOUR ANSWER'), findsOneWidget);
+    expect(find.text('CORRECT ANSWER'), findsOneWidget);
+    expect(find.text('Correct'), findsOneWidget);
+    expect(find.text('Right'), findsWidgets);
   });
 }

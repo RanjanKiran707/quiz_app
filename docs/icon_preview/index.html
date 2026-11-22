@@ -129,7 +129,7 @@
       The palette is the app’s forest green and warm off-white.
     </p>
     <div class="meta">
-      <span class="pill green">Preview only · nothing installed</span>
+      <span class="pill green">Selected · A installed</span>
       <span class="pill">App name: Quiz</span>
       <span class="pill">22 Nov 2026</span>
       <span class="pill">1024 × 1024 masters</span>
@@ -309,7 +309,7 @@
   </section>
 
   <footer>
-    Preview only. Reply with <strong>A</strong>, <strong>B</strong> or <strong>C</strong> to choose; the selected concept is recorded in <code>brief.md</code> and installed only then.
+    Concept <strong>A</strong> is installed on Android, iOS and Windows. Choosing another direction here only changes this preview page.
   </footer>
 </div>
 
@@ -343,7 +343,7 @@
 
   const cards = Array.from(document.querySelectorAll('.concept-card'));
   const statuses = Array.from(document.querySelectorAll('.choice-status'));
-  const saved = localStorage.getItem('quiz_icon_choice');
+  const saved = localStorage.getItem('quiz_icon_choice') || 'A';
   if (saved && iconById[saved]) {
     const card = document.querySelector('[data-concept="' + saved + '"]');
     if (card) {

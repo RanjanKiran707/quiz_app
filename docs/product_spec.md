@@ -1,6 +1,6 @@
 # Quiz App — Product Specification
 
-**Status:** Draft v4 — awaiting approval
+**Status:** Approved v4 — implemented
 **Date:** 2026-11-22
 **Source:** User PRD plus decisions agreed on 2026-11-22
 **App / package name:** `quiz_app`

@@ -7,7 +7,7 @@
 - **Style:** minimal, flat, softly geometric, strong silhouette, no fine detail, readable at 48 px.
 - **Must include:** a centred mark with about 22% padding; opaque background; high contrast; works in circle, rounded-square and squircle masks.
 - **Must avoid:** words or slogans, tiny detail, thin lines, photos, device frames, shadows spilling outside the mark, busy patterns, mathematical symbols.
-- **Chosen concept:** (empty until approved)
+- **Chosen concept:** **A — Monogram Q** (approved 22 Nov 2026)
 
 ## Concepts
 
@@ -19,9 +19,16 @@
 
 All three are hand-built vectors (SVG sources kept beside the PNGs), so they stay sharp when exported at any size. Preview them in `index.html`.
 
-## What happens after approval
+## Installed from Concept A
 
-1. The chosen PNG becomes the single master.
-2. Generate Android legacy, adaptive (foreground/background) and monochrome icons, iOS `AppIcon`, and Windows `.ico`.
-3. Rebuild the Android APK and Windows app, then check the launcher and taskbar.
-4. Record the choice here and in the progress log.
+| Target | Output |
+|---|---|
+| Android legacy | `android/app/src/main/res/mipmap-*/ic_launcher.png` |
+| Android adaptive | Cream `#F8F8F4` background with the Q foreground |
+| Android themed | Monochrome Q for Android 13 themed icons |
+| iOS | Full `AppIcon.appiconset`, alpha removed |
+| Windows | `windows/runner/resources/app_icon.ico` |
+
+Source assets: `assets/icon/app_icon.png`, `app_icon_foreground.png`, `app_icon_monochrome.png`. Regenerate with `dart run flutter_launcher_icons` after changing any of them.
+
+The adaptive foreground carries the mark at the same scale as iOS; the generator's 16% safe inset keeps the Q inside the circle and squircle masks.
